@@ -1,0 +1,14 @@
+# config.yaml
+
+paths:
+  train_data: /Users/mustafaaldabbas/Documents/GitHub/Rossmann-sales-prediction/Datasets/Raw/train.csv
+  test_data: /Users/mustafaaldabbas/Documents/GitHub/Rossmann-sales-prediction/Datasets/Raw/test.csv
+  store_data: /Users/mustafaaldabbas/Documents/GitHub/Rossmann-sales-prediction/Datasets/Raw/store.csv
+  test_store_data: /Users/mustafaaldabbas/Documents/GitHub/Rossmann-sales-prediction/Datasets/clean/test_store_data.csv
+  train_store_data:  /Users/mustafaaldabbas/Documents/GitHub/Rossmann-sales-prediction/Datasets/clean/train_store_data.csv
+  test_store_encoded_data: /Users/mustafaaldabbas/Documents/GitHub/Rossmann-sales-prediction/Datasets/encoded/test_store_encoded.csv
+  train_store_encoded_data: /Users/mustafaaldabbas/Documents/GitHub/Rossmann-sales-prediction/Datasets/encoded/train_store_encoded.csv
+  predictions_data: /Users/mustafaaldabbas/Documents/GitHub/Rossmann-sales-prediction/Datasets/Prediction/predictions.csv
+
+settings:
+  model_output: /Users/mustafaaldabbas/Documents/GitHub/Rossmann-sales-prediction/final_xgb_model.pkl
