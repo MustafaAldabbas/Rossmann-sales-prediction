@@ -17,6 +17,10 @@ import yaml
 # Utility libraries
 import joblib
 
+from sklearn.preprocessing import StandardScaler
+from sklearn.cluster import KMeans
+import matplotlib.pyplot as plt
+
 #-----------------------------------------------------------------------------------#
 #-----------------------------------------------------------------------------------#
 #Loding the Datasets
@@ -341,9 +345,219 @@ def correlation_heatmap(df, target_col='Sales'):
 #-----------------------------------------------------------------------------------#
 #-----------------------------------------------------------------------------------#
 
-import pandas as pd
-import numpy as np
-from sklearn.preprocessing import LabelEncoder
+def plot_sales_by_promo(df):
+    """
+    This function takes a DataFrame and plots the average sales for promo vs non-promo days.
+
+    Parameters:
+    df (pd.DataFrame): DataFrame containing sales data, with 'Promo' and 'Sales' columns.
+
+    Returns:
+    None: Displays a bar chart of average sales with and without promotions.
+    """
+    # Calculate average sales for promo vs non-promo days
+    sales_by_promo = df.groupby('Promo')['Sales'].mean()
+    print(sales_by_promo)
+
+    # Plotting the sales by promotion status
+    plt.figure(figsize=(4, 3))
+    sales_by_promo.plot(kind='bar', color='orange')
+    plt.xlabel('Promotion Status (0 = No, 1 = Yes)')
+    plt.ylabel('Average Sales')
+    plt.title('Average Sales with and without Promotions')
+    plt.xticks(rotation=0)
+    plt.show()
+
+
+
+
+
+
+
+#-----------------------------------------------------------------------------------#
+#-----------------------------------------------------------------------------------#
+
+def plot_sales_by_competition_distance(df, bins=10):
+    """
+    This function takes a DataFrame and plots the average sales against competition distance.
+
+    Parameters:
+    df (pd.DataFrame): DataFrame containing sales data, with 'CompetitionDistance' and 'Sales' columns.
+    bins (int): Number of bins to divide the competition distance into. Default is 10.
+
+    Returns:
+    None: Displays a line chart of average sales by competition distance.
+    """
+    # Analyze sales against competition distance
+    sales_by_competition_distance = df.groupby(pd.cut(df['CompetitionDistance'], bins=bins))['Sales'].mean()
+    print(sales_by_competition_distance)
+
+    # Plotting the sales by competition distance
+    plt.figure(figsize=(6, 3))
+    sales_by_competition_distance.plot(kind='line', marker='o', color='green')
+    plt.xlabel('Competition Distance (binned)')
+    plt.ylabel('Average Sales')
+    plt.title('Average Sales by Competition Distance')
+    plt.xticks(rotation=45)
+    plt.show()
+
+
+
+
+#-----------------------------------------------------------------------------------#
+#-----------------------------------------------------------------------------------#
+
+
+
+def plot_sales_by_school_holiday(df):
+    """
+    This function takes a DataFrame and plots the average sales on school holidays versus non-school holidays.
+
+    Parameters:
+    df (pd.DataFrame): DataFrame containing sales data, with 'SchoolHoliday' and 'Sales' columns.
+
+    Returns:
+    None: Displays a bar chart of average sales on school holidays vs non-school holidays.
+    """
+    # Calculate average sales on school holidays vs non-school holidays
+    sales_by_school_holiday = df.groupby('SchoolHoliday')['Sales'].mean()
+
+    # Plotting the average sales on school holidays vs non-school holidays
+    plt.figure(figsize=(8, 6))
+    sales_by_school_holiday.plot(kind='bar', color='purple')
+    plt.xlabel('School Holiday (0 = No, 1 = Yes)')
+    plt.ylabel('Average Sales')
+    plt.title('Average Sales on School Holidays vs Non-School Holidays')
+    plt.xticks(rotation=0)
+    plt.show()
+
+#
+
+
+#-----------------------------------------------------------------------------------#
+#-----------------------------------------------------------------------------------#
+
+def plot_sales_by_store_type_and_assortment(df):
+    """
+    This function takes a DataFrame and plots the average sales by store type and assortment type.
+
+    Parameters:
+    df (pd.DataFrame): DataFrame containing sales data, with 'StoreType', 'Assortment', and 'Sales' columns.
+
+    Returns:
+    None: Displays bar charts of average sales by store type and by assortment type.
+    """
+    # Calculate average sales by store type
+    sales_by_store_type = df.groupby('StoreType')['Sales'].mean()
+
+    # Plotting the average sales by store type
+    plt.figure(figsize=(8, 6))
+    sales_by_store_type.plot(kind='bar', color='teal')
+    plt.xlabel('Store Type')
+    plt.ylabel('Average Sales')
+    plt.title('Average Sales by Store Type')
+    plt.xticks(rotation=0)
+    plt.show()
+
+    # Calculate average sales by assortment
+    sales_by_assortment = df.groupby('Assortment')['Sales'].mean()
+
+    # Plotting the average sales by assortment
+    plt.figure(figsize=(8, 6))
+    sales_by_assortment.plot(kind='bar', color='coral')
+    plt.xlabel('Assortment Type')
+    plt.ylabel('Average Sales')
+    plt.title('Average Sales by Assortment Type')
+    plt.xticks(rotation=0)
+    plt.show()
+
+
+
+
+
+#-----------------------------------------------------------------------------------#
+#-----------------------------------------------------------------------------------#
+
+
+def perform_store_clustering(df, n_clusters=3, max_clusters=10):
+    """
+    This function performs K-means clustering on store data based on sales, customers, promo participation, and competition distance.
+
+    Parameters:
+    df (pd.DataFrame): DataFrame containing store data, with 'Store', 'Sales', 'Customers', 'Promo', and 'CompetitionDistance' columns.
+    n_clusters (int): Number of clusters to use for K-means clustering. Default is 3.
+    max_clusters (int): Maximum number of clusters to test in the Elbow Method. Default is 10.
+
+    Returns:
+    pd.DataFrame: DataFrame with cluster labels assigned to each store.
+    None: Displays the Elbow Method plot and cluster analysis bar charts.
+    """
+    # Ensure relevant columns are numeric
+    df['Sales'] = pd.to_numeric(df['Sales'], errors='coerce')
+    df['Customers'] = pd.to_numeric(df['Customers'], errors='coerce')
+    df['Promo'] = pd.to_numeric(df['Promo'], errors='coerce')
+    df['CompetitionDistance'] = pd.to_numeric(df['CompetitionDistance'], errors='coerce')
+
+    # Select relevant features for clustering
+    store_clustering_data = df.groupby('Store').agg({
+        'Sales': 'mean',
+        'Customers': 'mean',
+        'Promo': 'mean',
+        'CompetitionDistance': 'mean'
+    }).reset_index()
+
+    # Handle any missing values by filling with 0
+    store_clustering_data.fillna(0, inplace=True)
+
+    # Standardize the features
+    scaler = StandardScaler()
+    scaled_features = scaler.fit_transform(store_clustering_data[['Sales', 'Customers', 'Promo', 'CompetitionDistance']])
+
+    # Determine the optimal number of clusters using the Elbow Method
+    wcss = []
+    for i in range(1, max_clusters + 1):
+        kmeans = KMeans(n_clusters=i, random_state=42)
+        kmeans.fit(scaled_features)
+        wcss.append(kmeans.inertia_)
+
+    # Plot the Elbow Method chart
+    plt.figure(figsize=(10, 6))
+    plt.plot(range(1, max_clusters + 1), wcss, marker='o', linestyle='--')
+    plt.xlabel('Number of Clusters')
+    plt.ylabel('WCSS')
+    plt.title('Elbow Method for Optimal Number of Clusters')
+    plt.show()
+
+    # Applying K-means clustering with the chosen number of clusters
+    kmeans = KMeans(n_clusters=n_clusters, random_state=42)
+    clusters = kmeans.fit_predict(scaled_features)
+
+    # Add the cluster labels to the original store data
+    store_clustering_data['Cluster'] = clusters
+
+    # Analyze the characteristics of each cluster by calculating the mean of each feature within clusters
+    cluster_analysis = store_clustering_data.groupby('Cluster').mean()
+
+    # Display the cluster analysis
+    print(cluster_analysis)
+
+    # Plotting the cluster centers for visualization
+    plt.figure(figsize=(12, 6))
+    cluster_analysis[['Sales', 'Customers', 'Promo', 'CompetitionDistance']].plot(kind='bar')
+    plt.title('Cluster Analysis: Sales, Customers, Promo, and Competition Distance by Cluster')
+    plt.xticks(rotation=0)
+    plt.show()
+
+    return store_clustering_data
+
+
+
+
+
+#-----------------------------------------------------------------------------------#
+#-----------------------------------------------------------------------------------#
+
+
 
 def feature_engineering_and_split(train_df, test_df):
     """
