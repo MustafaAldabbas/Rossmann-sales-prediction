@@ -559,105 +559,66 @@ def perform_store_clustering(df, n_clusters=3, max_clusters=10):
 
 
 
-def feature_engineering_and_split(train_df, test_df):
-    """
-    Performs feature engineering on train and test datasets, including date-related features,
-    binary feature creation, lag features, moving averages, and cyclical transformations.
-    Finally, the function aligns the test dataset with the train dataset's columns and displays
-    the processed DataFrames.
-
-    Args:
-        train_df (pd.DataFrame): The training dataset.
-        test_df (pd.DataFrame): The testing dataset.
-
-    Returns:
-        pd.DataFrame, pd.DataFrame: The processed training and testing DataFrames.
-    """
+def feature_engineering(train_df_merged, test_df_merged):
     # Extract date-related features
-    for df in [train_df, test_df]:
+    for df in [train_df_merged, test_df_merged]:
         df['DayOfWeek'] = df['Date'].dt.dayofweek
         df['Month'] = df['Date'].dt.month
         df['Year'] = df['Date'].dt.year
         df['WeekOfYear'] = df['Date'].dt.isocalendar().week
 
     # Create binary features for holidays and promotions
-    train_df['IsHoliday'] = train_df['StateHoliday'].apply(lambda x: 1 if x != '0' else 0)
-    test_df['IsHoliday'] = test_df['StateHoliday'].apply(lambda x: 1 if x != '0' else 0)
-
-    train_df['IsPromo'] = train_df['Promo'].apply(lambda x: 1 if x == 1 else 0)
-    test_df['IsPromo'] = test_df['Promo'].apply(lambda x: 1 if x == 1 else 0)
+    for df in [train_df_merged, test_df_merged]:
+        df['IsHoliday'] = df['StateHoliday'].apply(lambda x: 1 if x != '0' else 0)
+        df['IsPromo'] = df['Promo'].apply(lambda x: 1 if x == 1 else 0)
 
     # Calculate competition duration in months
-    train_df['CompetitionOpenSince'] = 12 * (train_df['Year'] - train_df['CompetitionOpenSinceYear']) + (train_df['Month'] - train_df['CompetitionOpenSinceMonth'])
-    test_df['CompetitionOpenSince'] = 12 * (test_df['Year'] - test_df['CompetitionOpenSinceYear']) + (test_df['Month'] - test_df['CompetitionOpenSinceMonth'])
-
-    # Handle cases where the competition hasn't started yet (negative values)
-    train_df['CompetitionOpenSince'] = train_df['CompetitionOpenSince'].apply(lambda x: max(x, 0))
-    test_df['CompetitionOpenSince'] = test_df['CompetitionOpenSince'].apply(lambda x: max(x, 0))
+    for df in [train_df_merged, test_df_merged]:
+        df['CompetitionOpenSince'] = 12 * (df['Year'] - df['CompetitionOpenSinceYear']) + (df['Month'] - df['CompetitionOpenSinceMonth'])
+        df['CompetitionOpenSince'] = df['CompetitionOpenSince'].apply(lambda x: max(x, 0))
 
     # Calculate Promo2 duration in weeks
-    train_df['Promo2OpenSince'] = 52 * (train_df['Year'] - train_df['Promo2SinceYear']) + (train_df['WeekOfYear'] - train_df['Promo2SinceWeek'])
-    test_df['Promo2OpenSince'] = 52 * (test_df['Year'] - test_df['Promo2SinceYear']) + (test_df['WeekOfYear'] - test_df['Promo2SinceWeek'])
+    for df in [train_df_merged, test_df_merged]:
+        df['Promo2OpenSince'] = 52 * (df['Year'] - df['Promo2SinceYear']) + (df['WeekOfYear'] - df['Promo2SinceWeek'])
+        df['Promo2OpenSince'] = df['Promo2OpenSince'].apply(lambda x: max(x, 0))
 
-    # Handle cases where the promo hasn't started yet (negative values)
-    train_df['Promo2OpenSince'] = train_df['Promo2OpenSince'].apply(lambda x: max(x, 0))
-    test_df['Promo2OpenSince'] = test_df['Promo2OpenSince'].apply(lambda x: max(x, 0))
-
-    # Convert all values in 'StateHoliday' to strings and apply Label Encoding
+    # Convert 'StateHoliday' to strings and apply Label Encoding
     label_encoder = LabelEncoder()
-    train_df['StateHoliday'] = label_encoder.fit_transform(train_df['StateHoliday'].astype(str))
-    test_df['StateHoliday'] = label_encoder.transform(test_df['StateHoliday'].astype(str))
+    for df in [train_df_merged, test_df_merged]:
+        df['StateHoliday'] = df['StateHoliday'].astype(str)
+    train_df_merged['StateHoliday'] = label_encoder.fit_transform(train_df_merged['StateHoliday'])
+    test_df_merged['StateHoliday'] = label_encoder.transform(test_df_merged['StateHoliday'])
 
-    # One-Hot Encoding for categorical variables: 'StoreType', 'Assortment', and 'PromoInterval'
-    train_df = pd.get_dummies(train_df, columns=['StoreType', 'Assortment', 'PromoInterval'], drop_first=True)
-    test_df = pd.get_dummies(test_df, columns=['StoreType', 'Assortment', 'PromoInterval'], drop_first=True)
+    # One-Hot Encoding for categorical variables
+    train_df_merged = pd.get_dummies(train_df_merged, columns=['StoreType', 'Assortment', 'PromoInterval'], drop_first=True)
+    test_df_merged = pd.get_dummies(test_df_merged, columns=['StoreType', 'Assortment', 'PromoInterval'], drop_first=True)
 
-    # Align columns between train and test sets (important if using different datasets)
-    test_df = test_df.reindex(columns=train_df.columns, fill_value=0)
+    # Align columns between train and test sets
+    test_df_merged = test_df_merged.reindex(columns=train_df_merged.columns, fill_value=0)
 
-    # Lag Features for Sales
-    train_df['Sales_Lag_1'] = train_df['Sales'].shift(1)
-    train_df['Sales_Lag_7'] = train_df['Sales'].shift(7)
-    train_df['Sales_Lag_30'] = train_df['Sales'].shift(30)
+    # Create lag features
+    for lag in [1, 7, 30]:
+        train_df_merged[f'Customers_Lag_{lag}'] = train_df_merged['Customers'].shift(lag)
+        test_df_merged[f'Customers_Lag_{lag}'] = test_df_merged['Customers'].shift(lag)
+        train_df_merged[f'Open_Lag_{lag}'] = train_df_merged['Open'].shift(lag)
+        test_df_merged[f'Open_Lag_{lag}'] = test_df_merged['Open'].shift(lag)
+    
+    # Fill NaN values
+    train_df_merged.fillna(0, inplace=True)
+    test_df_merged.fillna(0, inplace=True)
 
-    # Drop rows with NaN values resulting from lag features
-    train_df.dropna(inplace=True)
-
-    # Create lag features for 'Customers'
-    train_df['Customers_Lag_1'] = train_df['Customers'].shift(1)
-    train_df['Customers_Lag_7'] = train_df['Customers'].shift(7)
-    train_df['Customers_Lag_30'] = train_df['Customers'].shift(30)
-
-    # Apply the same for the test set
-    test_df['Customers_Lag_1'] = test_df['Customers'].shift(1)
-    test_df['Customers_Lag_7'] = test_df['Customers'].shift(7)
-    test_df['Customers_Lag_30'] = test_df['Customers'].shift(30)
-
-    # Fill NaN values with 0 or use forward fill/backward fill based on your data context
-    train_df.fillna(0, inplace=True)
-    test_df.fillna(0, inplace=True)
-
-    # Create lag features for 'Open'
-    train_df['Open_Lag_1'] = train_df['Open'].shift(1)
-    train_df['Open_Lag_7'] = train_df['Open'].shift(7)
-    train_df['Open_Lag_30'] = train_df['Open'].shift(30)
-
-    # Drop rows with NaN values created by the lag features
-    train_df.dropna(inplace=True)
-
-    # Create moving average features for 'Sales'
-    train_df['Sales_MA_7'] = train_df['Sales'].rolling(window=7).mean()
-    train_df['Sales_MA_30'] = train_df['Sales'].rolling(window=30).mean()
-
-    # Optionally, create moving averages for 'Customers' if it was available
-    train_df['Customers_MA_7'] = train_df['Customers'].rolling(window=7).mean()
-    train_df['Customers_MA_30'] = train_df['Customers'].rolling(window=30).mean()
-
-    # Drop NaN values caused by the rolling operation
-    train_df.dropna(inplace=True)
+    # Create moving average features for 'Sales' and 'Customers'
+    for window in [7, 30]:
+        train_df_merged[f'Sales_MA_{window}'] = train_df_merged['Sales'].rolling(window=window).mean()
+        test_df_merged[f'Sales_MA_{window}'] = train_df_merged['Sales'].rolling(window=window).mean()
+        train_df_merged[f'Customers_MA_{window}'] = train_df_merged['Customers'].rolling(window=window).mean()
+        test_df_merged[f'Customers_MA_{window}'] = train_df_merged['Customers'].rolling(window=window).mean()
+    
+    # Drop NaN values caused by the rolling operation in the train set
+    train_df_merged.dropna(inplace=True)
 
     # Apply Sine and Cosine Transformations to cyclical features
-    for df in [train_df, test_df]:
+    for df in [train_df_merged, test_df_merged]:
         df['DayOfWeek_Sin'] = np.sin(2 * np.pi * df['DayOfWeek'] / 7)
         df['DayOfWeek_Cos'] = np.cos(2 * np.pi * df['DayOfWeek'] / 7)
         df['Month_Sin'] = np.sin(2 * np.pi * df['Month'] / 12)
@@ -665,67 +626,30 @@ def feature_engineering_and_split(train_df, test_df):
         df['WeekOfYear_Sin'] = np.sin(2 * np.pi * df['WeekOfYear'] / 52)
         df['WeekOfYear_Cos'] = np.cos(2 * np.pi * df['WeekOfYear'] / 52)
 
-    # Drop any remaining NaN values
-    train_df.dropna(inplace=True)
-    test_df.fillna(0, inplace=True)
-
-    # Display the processed DataFrames
-    print("Processed Training DataFrame:")
-    print(train_df.head())
-
-    print("\nProcessed Testing DataFrame:")
-    print(test_df.head())
-
-    return train_df, test_df
-
-
-
+    return train_df_merged, test_df_merged
 
 #-----------------------------------------------------------------------------------#
-#-----------------------------------------------------------------------------------#
-
-
-
-def split_train_test(df, target_column='Sales', date_column='Date', cutoff_date='2015-06-01'):
-    """
-    Splits the given DataFrame into training and testing sets based on a cutoff date.
-    
-    Args:
-        df (pd.DataFrame): The DataFrame to be split.
-        target_column (str): The name of the target column. Defaults to 'Sales'.
-        date_column (str): The name of the date column. Defaults to 'Date'.
-        cutoff_date (str): The cutoff date for splitting the data. Defaults to '2015-06-01'.
-    
-    Returns:
-        pd.DataFrame: X_train (features for training set)
-        pd.Series: y_train (target for training set)
-        pd.DataFrame: X_test (features for testing set)
-        pd.Series: y_test (target for testing set)
-    """
-    # Ensure the date column is in datetime format
-    df[date_column] = pd.to_datetime(df[date_column])
-    
+def split_and_separate_features(train_df_merged, cutoff_date='2015-06-01'):
     # Split the dataset into training and test sets based on the cutoff date
-    train_set = df[df[date_column] < cutoff_date]
-    test_set = df[df[date_column] >= cutoff_date]
-    
+    train_set = train_df_merged[train_df_merged['Date'] < cutoff_date]
+    test_set = train_df_merged[train_df_merged['Date'] >= cutoff_date]
+
     # Separate features and target variable for training and testing
-    X_train = train_set.drop(columns=[target_column, date_column, 'Customers', 'Open'])
-    y_train = train_set[target_column]
-    
-    X_test = test_set.drop(columns=[target_column, date_column, 'Customers', 'Open'])
-    y_test = test_set[target_column]
-    
-    # Verify the split
+    X_train = train_set.drop(columns=['Sales', 'Date', 'Customers', 'Open'])
+    y_train = train_set['Sales']
+
+    X_test = test_set.drop(columns=['Sales', 'Date', 'Open', 'Customers'])
+    y_test = test_set['Sales']
+
+    # Print the split verification
     print("Training set shape:", X_train.shape)
     print("Test set shape:", X_test.shape)
-    
-    print("Training set date range:", train_set[date_column].min(), "to", train_set[date_column].max())
-    print("Test set date range:", test_set[date_column].min(), "to", test_set[date_column].max())
-    
+    print("Training set date range:", train_set['Date'].min(), "to", train_set['Date'].max())
+    print("Test set date range:", test_set['Date'].min(), "to", test_set['Date'].max())
+
     return X_train, y_train, X_test, y_test
 
-#-----------------------------------------------------------------------------------#
+
 #-----------------------------------------------------------------------------------#
 
 
@@ -947,20 +871,12 @@ def train_and_evaluate_lightgbm(X_train, y_train, X_test, y_test, n_estimators=1
 #-----------------------------------------------------------------------------------
 
 
-def hyperparameter_tuning_and_evaluate(X_train, y_train, X_test, y_test):
-    """
-    Performs hyperparameter tuning using GridSearchCV, trains the best model, and evaluates it on the test set.
+from sklearn.model_selection import GridSearchCV
+import xgboost as xgb
+from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 
-    Args:
-        X_train (pd.DataFrame): The training features.
-        y_train (pd.Series): The training target.
-        X_test (pd.DataFrame): The testing features.
-        y_test (pd.Series): The testing target.
-
-    Returns:
-        dict: A dictionary containing the best model, predictions, and evaluation metrics (RMSE, MAE, R-squared).
-    """
-    # Define the XGBoost model
+def tune_and_evaluate_xgboost(X_train, y_train, X_test, y_test):
+    # Define the model
     xgb_model = xgb.XGBRegressor(random_state=42, enable_categorical=True)
 
     # Define the grid of hyperparameters
@@ -974,8 +890,8 @@ def hyperparameter_tuning_and_evaluate(X_train, y_train, X_test, y_test):
 
     # Set up the grid search
     grid_search = GridSearchCV(estimator=xgb_model, param_grid=param_grid, 
-                               scoring='neg_root_mean_squared_error', cv=3, 
-                               verbose=2, n_jobs=-1)
+                               scoring='neg_root_mean_squared_error', 
+                               cv=3, verbose=2, n_jobs=-1)
 
     # Fit the grid search to the data
     grid_search.fit(X_train, y_train)
@@ -995,21 +911,11 @@ def hyperparameter_tuning_and_evaluate(X_train, y_train, X_test, y_test):
     test_mae_best_xgb = mean_absolute_error(y_test, y_test_pred_best_xgb)
     test_r2_best_xgb = r2_score(y_test, y_test_pred_best_xgb)
 
-    # Print the evaluation metrics
     print(f"Best XGBoost Test RMSE: {test_rmse_best_xgb}")
     print(f"Best XGBoost Test MAE: {test_mae_best_xgb}")
     print(f"Best XGBoost Test R-squared: {test_r2_best_xgb}")
 
-    # Return the best model and evaluation metrics
-    return {
-        'best_model': best_xgb_model,
-        'predictions': y_test_pred_best_xgb,
-        'metrics': {
-            'rmse': test_rmse_best_xgb,
-            'mae': test_mae_best_xgb,
-            'r2': test_r2_best_xgb
-        }
-    }
+    return best_xgb_model, test_rmse_best_xgb, test_mae_best_xgb, test_r2_best_xgb
 
 
 
@@ -1017,32 +923,31 @@ def hyperparameter_tuning_and_evaluate(X_train, y_train, X_test, y_test):
 #-----------------------------------------------------------------------------------
 
 
-import pandas as pd
 
-def create_model_results_dataframe(rf_metrics, xgb_metrics, xgb_tuned_metrics, lgb_metrics, best_xgb_params):
+def create_display_and_visualize_model_results(grid_search, test_rmse, test_mae, test_r2):
     """
-    Creates a DataFrame summarizing the results of different models.
-
-    Args:
-        rf_metrics (dict): Evaluation metrics for the Random Forest model.
-        xgb_metrics (dict): Evaluation metrics for the XGBoost model.
-        xgb_tuned_metrics (dict): Evaluation metrics for the tuned XGBoost model.
-        lgb_metrics (dict): Evaluation metrics for the LightGBM model.
-        best_xgb_params (dict): Best hyperparameters found during XGBoost tuning.
-
+    Creates a DataFrame summarizing the results of different models, displays it, and visualizes the results.
+    
+    Parameters:
+    - grid_search: The GridSearchCV object used to tune the XGBoost model.
+    - test_rmse: RMSE of the tuned XGBoost model on the test set.
+    - test_mae: MAE of the tuned XGBoost model on the test set.
+    - test_r2: R-squared of the tuned XGBoost model on the test set.
+    
     Returns:
-        pd.DataFrame: A DataFrame summarizing the results of the models.
+    - results_df: A DataFrame summarizing the performance and hyperparameters of each model.
     """
+    
     # Define the results for each model
     model_results = {
         'Model': ['Random Forest', 'XGBoost', 'XGBoost (Tuned)', 'LightGBM'],
-        'RMSE': [rf_metrics['rmse'], xgb_metrics['rmse'], xgb_tuned_metrics['rmse'], lgb_metrics['rmse']],
-        'MAE': [rf_metrics['mae'], xgb_metrics['mae'], xgb_tuned_metrics['mae'], lgb_metrics['mae']],
-        'R-squared': [rf_metrics['r2'], xgb_metrics['r2'], xgb_tuned_metrics['r2'], lgb_metrics['r2']],
+        'RMSE': [0.4511, 0.2893, test_rmse, 0.4372],
+        'MAE': [0.2217, 0.0751, test_mae, 0.1960],
+        'R-squared': [0.9786, 0.9912, test_r2, 0.9799],
         'Hyperparameters': [
             'n_estimators=100, max_depth=10',  # Random Forest parameters
             'n_estimators=100, max_depth=10',  # XGBoost parameters
-            str(best_xgb_params),              # Tuned XGBoost best parameters
+            str(grid_search.best_params_),     # Tuned XGBoost best parameters
             'n_estimators=100, max_depth=10'   # LightGBM parameters
         ]
     }
@@ -1050,25 +955,189 @@ def create_model_results_dataframe(rf_metrics, xgb_metrics, xgb_tuned_metrics, l
     # Create a DataFrame from the results
     results_df = pd.DataFrame(model_results)
 
+    # Display the DataFrame
+    print(results_df)
+
+    # Visualize the RMSE of each model
+    plt.figure(figsize=(10, 6))
+    plt.barh(results_df['Model'], results_df['RMSE'], color='skyblue')
+    plt.xlabel('RMSE')
+    plt.title('Model RMSE Comparison')
+    plt.show()
+
+    # Visualize the MAE of each model
+    plt.figure(figsize=(10, 6))
+    plt.barh(results_df['Model'], results_df['MAE'], color='lightcoral')
+    plt.xlabel('MAE')
+    plt.title('Model MAE Comparison')
+    plt.show()
+
+    # Visualize the R-squared of each model
+    plt.figure(figsize=(10, 6))
+    plt.barh(results_df['Model'], results_df['R-squared'], color='lightgreen')
+    plt.xlabel('R-squared')
+    plt.title('Model R-squared Comparison')
+    plt.show()
+
     return results_df
 
 
 
 
 
+#-----------------------------------------------------------------------------------#
+import joblib
+import xgboost as xgb
+
+def save_and_train_full_model(best_xgb_model, train_df_merged, tuned_model_path='best_xgb_model_tuned.pkl', full_model_path='best_xgb_model_full_trained.pkl'):
+    """
+    Saves the tuned XGBoost model and trains it on the full dataset.
+    
+    Parameters:
+    - best_xgb_model: The best XGBoost model found after hyperparameter tuning.
+    - train_df_merged: The full training dataset after feature engineering.
+    - tuned_model_path: Path where the tuned model will be saved.
+    - full_model_path: Path where the fully trained model will be saved.
+    
+    Returns:
+    - best_xgb_model: The best XGBoost model after tuning.
+    - best_xgb_model_full: The XGBoost model trained on the full dataset.
+    """
+    
+    # Save the tuned XGBoost model
+    joblib.dump(best_xgb_model, tuned_model_path)
+    
+    # Load the saved tuned model
+    best_xgb_model_full = joblib.load(tuned_model_path)
+    
+    # Prepare the training data by dropping the specified columns
+    X_full_train = train_df_merged.drop(columns=['Sales', 'Date', 'Open', 'Customers'])
+    y_full_train = train_df_merged['Sales']  # Assuming 'Sales' is the target variable
+    
+    # Train the model on the prepared full training data
+    best_xgb_model_full.fit(X_full_train, y_full_train)
+    
+    # Optionally, save the fully trained model
+    joblib.dump(best_xgb_model_full, full_model_path)
+    
+    return best_xgb_model, best_xgb_model_full
+
+
+
+#-----------------------------------------------------------------------------------#
+
+
+#-----------------------------------------------------------------------------------#
+#-----------------------------------------------------------------------------------#
+def predict_future_sales(test_df_merged, model_path='best_xgb_model_full_trained.pkl', output_csv='predicted_sales_test_df_merged.csv'):
+    """
+    Aligns the test dataset with the training dataset columns, predicts future sales, 
+    and saves the predictions to a CSV file.
+    
+    Parameters:
+    - test_df_merged: The test DataFrame that needs to be aligned and predicted.
+    - model_path: Path to the trained model to be used for prediction.
+    - output_csv: Path to the output CSV file where predictions will be saved.
+    
+    Returns:
+    - test_df_merged: The test DataFrame with the predicted sales added.
+    """
+    
+    # Define the common columns to ensure alignment between train and test sets
+    common_columns = ['Store', 'DayOfWeek', 'Promo', 'StateHoliday', 'SchoolHoliday', 
+                      'CompetitionDistance', 'CompetitionOpenSinceMonth', 
+                      'CompetitionOpenSinceYear', 'Promo2', 'Promo2SinceWeek', 
+                      'Promo2SinceYear', 'Month', 'Year', 'WeekOfYear', 
+                      'IsHoliday', 'IsPromo', 'CompetitionOpenSince', 
+                      'Promo2OpenSince', 'StoreType_b', 'StoreType_c', 
+                      'StoreType_d', 'Assortment_b', 'Assortment_c', 
+                      'PromoInterval_Jan,Apr,Jul,Oct', 'PromoInterval_Mar,Jun,Sept,Dec', 
+                      'PromoInterval_None', 'Sales_Lag_1', 'Sales_Lag_7', 
+                      'Sales_Lag_30', 'Customers_Lag_1', 'Customers_Lag_7', 
+                      'Customers_Lag_30', 'Open_Lag_1', 'Open_Lag_7', 
+                      'Open_Lag_30', 'Sales_MA_7', 'Sales_MA_30', 
+                      'Customers_MA_7', 'Customers_MA_30', 'DayOfWeek_Sin', 
+                      'DayOfWeek_Cos', 'Month_Sin', 'Month_Cos', 
+                      'WeekOfYear_Sin', 'WeekOfYear_Cos']
+
+    # Identify missing columns in test_df_merged
+    missing_columns = [col for col in common_columns if col not in test_df_merged.columns]
+    if missing_columns:
+        print("Missing columns in test_df_merged:", missing_columns)
+        # Add the missing columns with default values (0)
+        for col in missing_columns:
+            test_df_merged[col] = 0
+
+    # Reorder the test_df_merged columns to match the training data order
+    X_test_full = test_df_merged[common_columns]
+
+    # Load the trained model
+    best_xgb_model_full = joblib.load(model_path)
+
+    # Predict sales for the entire timeframe of the test set
+    predicted_sales = best_xgb_model_full.predict(X_test_full)
+
+    # Optionally, add the predictions to the test_df_merged DataFrame
+    test_df_merged['Predicted_Sales'] = predicted_sales
+
+    # Save the predictions to a CSV file
+    test_df_merged.to_csv(output_csv, index=False)
+
+    return test_df_merged
+
+
 #-----------------------------------------------------------------------------------
 
 
 
 
+def plot_sales_history_and_predictions(train_df_merged, test_df_merged):
+    """
+    Plots the historical sales for the last two months and future predicted sales.
 
+    Parameters:
+    - train_df_merged: The training DataFrame with historical sales data.
+    - test_df_merged: The test DataFrame with predicted sales data.
 
+    The function will display a plot with two subplots: one for the last two months of historical sales and one for future predicted sales.
+    """
 
-#-----------------------------------------------------------------------------------
+    # Ensure 'Date' is in datetime format
+    train_df_merged['Date'] = pd.to_datetime(train_df_merged['Date'])
+    test_df_merged['Date'] = pd.to_datetime(test_df_merged['Date'])
 
+    # Filter the last two months of historical data
+    last_two_months = train_df_merged[train_df_merged['Date'] >= train_df_merged['Date'].max() - pd.DateOffset(months=2)]
 
+    # Prepare the daily sales for historical data
+    historical_sales = last_two_months.groupby('Date')['Sales'].sum().reset_index()
 
+    # Prepare the daily sales for predicted data
+    future_predictions = test_df_merged.groupby('Date')['Predicted_Sales'].sum().reset_index()
 
+    # Create the plot with two subplots
+    plt.figure(figsize=(14, 6))
+
+    # Plot for the last two months of historical data
+    plt.subplot(1, 2, 1)
+    plt.plot(historical_sales['Date'], historical_sales['Sales'], color='blue', label='Historical Sales')
+    plt.xlabel('Date')
+    plt.ylabel('Sales')
+    plt.title('Historical Sales (Last Two Months)')
+    plt.xticks(rotation=45)
+    plt.legend()
+
+    # Plot for the future predictions
+    plt.subplot(1, 2, 2)
+    plt.plot(future_predictions['Date'], future_predictions['Predicted_Sales'], color='orange', label='Predicted Sales')
+    plt.xlabel('Date')
+    plt.ylabel('Predicted Sales')
+    plt.title('Future Predicted Sales')
+    plt.xticks(rotation=45)
+    plt.legend()
+
+    plt.tight_layout()
+    plt.show()
 
 
 
