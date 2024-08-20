@@ -6,8 +6,8 @@ paths:
   store_data: /Users/mustafaaldabbas/Documents/GitHub/Rossmann-sales-prediction/Datasets/Raw/store.csv
   test_store_data: /Users/mustafaaldabbas/Documents/GitHub/Rossmann-sales-prediction/Datasets/clean/test_store_data.csv
   train_store_data:  /Users/mustafaaldabbas/Documents/GitHub/Rossmann-sales-prediction/Datasets/clean/train_store_data.csv
-  predictions_data: /Users/mustafaaldabbas/Documents/GitHub/Rossmann-sales-prediction/Datasets/Prediction/predictions_historical.csv
+  predictions_data: /Users/mustafaaldabbas/Documents/GitHub/Rossmann-sales-prediction/Datasets/Prediction/predicted_sales_test_df_merged.csv
 
 settings:
-  model_output: /Users/mustafaaldabbas/Documents/GitHub/Rossmann-sales-prediction/trained_xgb_model.pkl
+  model_output: /Users/mustafaaldabbas/Documents/GitHub/Rossmann-sales-prediction/best_xgb_model_full_trained.pkl
   functions.py: /Users/mustafaaldabbas/Documents/GitHub/Rossmann-sales-prediction/functions.py

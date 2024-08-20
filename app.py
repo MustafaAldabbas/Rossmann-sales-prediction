@@ -2,21 +2,25 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 import joblib
+import seaborn as sns
 from functions import (
     load_datasets,
     clean_and_merge_datasets,
-    plot_and_transform_sales,
-    train_final_xgb_model,
-    feature_engineering_and_split,
-    hyperparameter_tuning_and_evaluate,
-    correlation_heatmap,
+    timeseries_eda,
+    train_and_evaluate_rf,
+    train_and_evaluate_xgboost,
+    tune_and_evaluate_xgboost,
+    save_and_train_full_model,
+    predict_sales_for_test_df,
+    plot_sales_comparison_streamlit,
     bivariate_eda,
-    plot_sales_by_promo,
-    plot_sales_by_competition_distance,
     perform_store_clustering,
-    create_model_results_dataframe,
-    create_features_and_predict_sales,
-    plot_sales_comparison
+    univariate_eda,
+    plot_sales_by_store_type_and_assortment,
+    plot_sales_by_school_holiday,
+    plot_sales_by_competition_distance,
+    plot_sales_by_promo,
+    feature_engineering,
 )
 
 # Load datasets using the `load_datasets` function
@@ -28,6 +32,9 @@ test_df = data['test_df']
 # Clean and merge the datasets
 train_df_merged, test_df_merged = clean_and_merge_datasets(train_df, test_df, store_df)
 
+# **Load the pre-processed test dataframe (processed_test_df.pkl)**
+test_df_merged = pd.read_pickle("processed_test_df.pkl")
+
 # Set up the Streamlit app
 st.set_page_config(page_title="Rossmann Sales Forecasting", layout="wide")
 
@@ -35,8 +42,9 @@ st.set_page_config(page_title="Rossmann Sales Forecasting", layout="wide")
 st.sidebar.title("Rossmann Sales Forecasting App")
 pages = st.sidebar.radio(
     "Navigate to",
-    ["Introduction", "EDA", "Feature Engineering", "Modeling", "Prediction", "Conclusion"]
+    ["Introduction", "EDA", "EDA 2", "Feature Engineering", "Modeling", "Prediction & Visualization", "Conclusion"]
 )
+
 # Authors section in sidebar
 st.sidebar.markdown("### Authors")
 st.sidebar.image('/Users/mustafaaldabbas/Documents/GitHub/Rossmann-sales-prediction/Visuals/Personal pic/Mustafa HS2.jpg', width=100)
@@ -47,102 +55,288 @@ st.sidebar.markdown("[LinkedIn](https://www.linkedin.com/in/your-linkedin-id/)")
 if pages == "Introduction":
     st.markdown("<h1 style='color: LightBlue;'>Rossmann Sales Forecasting 📈</h1>", unsafe_allow_html=True)
     st.image('/Users/mustafaaldabbas/Documents/GitHub/Rossmann-sales-prediction/Visuals/streamlit pics /rossman.png', width=1000)  # Update this path
+
+    # Load the datasets
+    train_data = pd.read_csv('/Users/mustafaaldabbas/Documents/GitHub/Rossmann-sales-prediction/Datasets/Raw/train.csv')
+    test_data = pd.read_csv('/Users/mustafaaldabbas/Documents/GitHub/Rossmann-sales-prediction/Datasets/Raw/test.csv')
+    store_data = pd.read_csv('/Users/mustafaaldabbas/Documents/GitHub/Rossmann-sales-prediction/Datasets/Raw/store.csv')
+    
+    st.markdown("### Raw Datasets Preview")
+    
+    # Create tabs for each dataset
+    tab1, tab2, tab3 = st.tabs(["Train Dataset", "Test Dataset", "Store Dataset"])
+    
+    with tab1:
+        st.markdown("**Train Dataset (First 5 rows):**")
+        st.dataframe(train_data.head())
+    
+    with tab2:
+        st.markdown("**Test Dataset (First 5 rows):**")
+        st.dataframe(test_data.head())
+    
+    with tab3:
+        st.markdown("**Store Dataset (First 5 rows):**")
+        st.dataframe(store_data.head())
+    
     st.markdown("""
     ## Welcome to the Rossmann Sales Forecasting Project
-    This application is designed to forecast daily sales for Rossmann stores using historical data and store characteristics. Navigate through the app to explore the data, understand the models, and see the predictions in action.
+
+    The project aims to address a critical business challenge: predicting daily sales for Rossmann stores. The ability to accurately forecast sales is essential for inventory management, staffing, and promotional planning. By leveraging historical sales data and various store-related features, the project seeks to build a robust predictive model that can help Rossmann improve its operational efficiency and optimize sales.
+
+    ### **1. Project Definition and Objectives**
+
+    **Primary Objective:** 
+    - Predict daily sales for Rossmann stores using historical sales data and store-specific features.
+
+    **Secondary Objectives:**
+    - Understand the key factors influencing sales in retail stores.
+    - Develop a predictive model capable of accurately forecasting sales.
+    - Identify actionable insights to enhance sales performance based on model predictions.
+
+    **Project Hypothesis or Analytical Questions**
+    The project seeks to explore the following hypotheses or questions:
+
+    - **Key Factors:** What are the most significant factors affecting daily sales in Rossmann stores?
+    - **Model Accuracy:** Can we develop a model that accurately predicts sales across various store types and conditions?
+    - **Promotions Impact:** How do promotions and competitive factors influence store sales?
+    - **Seasonality:** How do seasonal trends affect sales, and can they be effectively modeled?
+
+    ### **2. Datasets Summary**
+
+    **store.csv:**
+    Contains information about the stores, including store type, assortment type, competition distance, and promotional details.
+    - **Total Records:** 1,115
+    - **Key Columns:**
+      - Store: Store identifier.
+      - StoreType: Type of store.
+      - Assortment: Type of assortment.
+      - CompetitionDistance: Distance to nearest competitor.
+      - Promo2: Indicator of ongoing promotion.
+    - **Missing Values:** Some missing values in columns like CompetitionDistance, CompetitionOpenSinceMonth, CompetitionOpenSinceYear, Promo2SinceWeek, Promo2SinceYear, and PromoInterval.
+
+    **train.csv:** 
+    Contains historical sales data for training the model.
+    - **Total Records:** 1,017,209
+    - **Key Columns:**
+      - Store: Store identifier.
+      - DayOfWeek: Day of the week.
+      - Date: Date of the transaction.
+      - Sales: Sales amount.
+      - Customers: Number of customers.
+      - Open: Whether the store was open or closed.
+      - Promo: Whether a promotion was running.
+    - **Missing Values:** None significant.
+
+    **test.csv:** 
+    Contains data to be used for making predictions.
+    - **Total Records:** 41,088
+    - **Key Columns:**
+      - Similar to train.csv but without the Sales column since this is the target variable to predict.
+    - **Missing Values:** None significant.
+
+    Navigate through the app to explore the data, understand the models, and see the predictions in action.
     """)
+
 
 # EDA Page
 elif pages == "EDA":
     st.title("Exploratory Data Analysis (EDA) 📊")
 
-    tab1, tab2, tab3, tab4 = st.tabs(["Univariate Analysis", "Bivariate Analysis", "Time Series Analysis", "Clustering Analysis"])
+    tab1, tab2, tab3, tab4, tab5 = st.tabs([
+        "Univariate Analysis", 
+        "Bivariate Analysis", 
+        "Time Series Analysis", 
+        "Clustering Analysis",
+        "Sales by Store Type and Assortment",
+    ])
 
     with tab1:
         st.subheader("Univariate Analysis")
-        st.markdown("### Sales Distribution")
-        plot_and_transform_sales(train_df_merged, column='Sales')
+        univariate_eda(train_df_merged) 
 
     with tab2:
         st.subheader("Bivariate Analysis")
-        st.markdown("### Correlation Heatmap")
-        correlation_heatmap(train_df_merged)
-        st.markdown("### Additional Bivariate Analysis")
-        bivariate_eda(train_df_merged)
+        st.markdown("### Sales Distribution")
+        bivariate_eda(train_df_merged) 
 
     with tab3:
         st.subheader("Time Series Analysis")
-        st.markdown("### Sales Over Time")
-        plot_sales_by_promo(train_df_merged)
-        plot_sales_by_competition_distance(train_df_merged)
+        timeseries_eda(train_df_merged)
 
     with tab4:
         st.subheader("Clustering Analysis")
-        st.markdown("### Store Clustering")
         perform_store_clustering(train_df_merged)
+
+    with tab5:
+        st.subheader("Sales by Store Type and Assortment")
+        plot_sales_by_store_type_and_assortment(train_df_merged)  # Display the plots
+
+# EDA 2 Page
+elif pages == "EDA 2":
+    st.title("Exploratory Data Analysis (EDA) 📊")
+    tab6, tab7, tab8 = st.tabs([
+        "Sales by School Holiday",
+        "Sales by Competition Distance",
+        "Sales by Promotion" 
+    ])
+
+    with tab6:
+        st.subheader("Sales by School Holiday")
+        plot_sales_by_school_holiday(train_df_merged)  # Display the sales by school holiday plot
+
+    with tab7:
+        st.subheader("Sales by Competition Distance")
+        plot_sales_by_competition_distance(train_df_merged)  # Display the sales by competition distance plot
+
+    with tab8:
+        st.subheader("Sales by Promotion")
+        plot_sales_by_promo(train_df_merged)  # Display the sales by promotion plot
 
 # Feature Engineering Page
 elif pages == "Feature Engineering":
     st.title("Feature Engineering 🔧")
 
     st.markdown("### Applying Feature Engineering")
-    train_df_merged, test_df_merged = feature_engineering_and_split(train_df_merged, test_df_merged)
-    st.write(train_df_merged.head())
-    st.write(test_df_merged.head())
+    test_df_merged, train_df_merged, X_train, X_test, y_train, y_test = feature_engineering(train_df_merged, test_df_merged)
 
     st.markdown("### Feature Engineering Completed")
-    st.markdown("The dataset has been processed with new features.")
+
+    st.write("train_df_merged sample:")
+    st.write(train_df_merged.head())
+
+    st.write("test_df_merged sample:")
+    st.write(test_df_merged.head())
+
+    st.write("X_train sample:")
+    st.write(X_train.head())
+
+    st.write("y_train sample:")
+    st.write(y_train.head())
 
 # Modeling Page
 elif pages == "Modeling":
     st.title("Modeling 🧠")
 
-    tab1, tab2, tab3 = st.tabs(["Model Training", "Hyperparameter Tuning", "Model Performance"])
+    if 'X_train' not in locals() or 'X_test' not in locals():
+        st.markdown("Feature engineering and data splitting are being applied...")
+        test_df_merged, train_df_merged, X_train, X_test, y_train, y_test = feature_engineering(train_df_merged, test_df_merged)
+
+    tab1, tab2, tab3, tab4, tab5 = st.tabs([
+        "Train Random Forest", 
+        "Train XGBoost", 
+        "Tune XGBoost", 
+        "Model Performance",
+        "Train Full Model"
+    ])
 
     with tab1:
-        st.subheader("Model Training")
-        st.markdown("### Train the Final XGBoost Model")
-        final_xgb_model = train_final_xgb_model(train_df_merged)
-        st.markdown("#### Model Trained Successfully!")
+        st.subheader("Train Random Forest")
+        st.markdown("### Training Random Forest Model")
 
-        # Save the model
-        model_path = '/Users/mustafaaldabbas/Documents/GitHub/Rossmann-sales-prediction/trained_xgb_model.pkl'  # Update this path
-        joblib.dump(final_xgb_model, model_path)
-        st.write(f"Model saved to {model_path}")
+        rf_model = train_and_evaluate_rf(X_train, y_train, X_test, y_test)
+        if rf_model:
+            st.write(f"Random Forest Model Performance Metrics:")
+            st.write(f"RMSE: {rf_model['metrics']['rmse']}")
+            st.write(f"MAE: {rf_model['metrics']['mae']}")
+            st.write(f"R2: {rf_model['metrics']['r2']}")
+        else:
+            st.error("Random Forest model training failed. Please check the logs for more details.")
 
     with tab2:
-        st.subheader("Hyperparameter Tuning")
-        st.markdown("### Hyperparameter Tuning Results")
-        best_params, best_score = hyperparameter_tuning_and_evaluate(train_df_merged)
-        st.write("Best Parameters:", best_params)
-        st.write("Best Score:", best_score)
+        st.subheader("Train XGBoost")
+        st.markdown("### Training XGBoost Model")
+
+        xgb_model = train_and_evaluate_xgboost(X_train, y_train, X_test, y_test)
+        if xgb_model:
+            st.write(f"XGBoost Model Performance Metrics:")
+            st.write(f"RMSE: {xgb_model['metrics']['rmse']}")
+            st.write(f"MAE: {xgb_model['metrics']['mae']}")
+            st.write(f"R2: {xgb_model['metrics']['r2']}")
+        else:
+            st.error("XGBoost model training failed. Please check the logs for more details.")
 
     with tab3:
+        st.subheader("Tune XGBoost")
+        st.markdown("### Hyperparameter Tuning for XGBoost")
+
+        best_xgb_model, test_rmse_best_xgb, test_mae_best_xgb, test_r2_best_xgb, grid_search = tune_and_evaluate_xgboost(X_train, y_train, X_test, y_test)
+
+        st.write("Best Parameters Found:", grid_search.best_params_)
+        st.write("Best RMSE:", test_rmse_best_xgb)
+        st.write("Best MAE:", test_mae_best_xgb)
+        st.write("Best R-squared:", test_r2_best_xgb)
+
+        # Save the best model from hyperparameter tuning
+        tuned_model_path = 'best_xgb_model_tuned.pkl'
+        joblib.dump(best_xgb_model, tuned_model_path)
+        st.write(f"Tuned model saved to {tuned_model_path}")
+
+    with tab4:
         st.subheader("Model Performance")
-        st.markdown("### Performance Metrics")
-        model_results_df = create_model_results_dataframe(train_df_merged)
-        st.write(model_results_df)
+        st.markdown("### Evaluate Model Performance")
 
-# Prediction Page
-# Prediction Page
-# Prediction Page
-elif pages == "Prediction":
-    st.title("Prediction 🔮")
+        # Assuming you have stored performance metrics or have a final model to evaluate
+        # Display metrics for Random Forest
+        if 'rf_model' in locals() and rf_model:
+            st.write("Random Forest Model Performance Metrics:")
+            st.write(f"RMSE: {rf_model['metrics']['rmse']}")
+            st.write(f"MAE: {rf_model['metrics']['mae']}")
+            st.write(f"R2: {rf_model['metrics']['r2']}")
+        else:
+            st.warning("Random Forest model performance is unavailable. Train the model first.")
 
-    # Load the trained model
-    final_xgb_model = joblib.load('/Users/mustafaaldabbas/Documents/GitHub/Rossmann-sales-prediction/trained_xgb_model.pkl')  # Update this path
-    
-    st.markdown("### Making Predictions")
-    
-    # Ensure that the feature engineering is applied correctly
-    try:
-        test_df_merged = create_features_and_predict_sales(train_df_merged, test_df_merged, final_xgb_model)
-        st.write(test_df_merged[['Store', 'Date', 'Predicted_Sales']].head())
-        st.markdown("#### Actual vs Predicted Sales")
-        plot_sales_comparison(train_df_merged, test_df_merged)
-    except KeyError as e:
-        st.error(f"Error: {str(e)}")
+        # Display metrics for XGBoost
+        if 'xgb_model' in locals() and xgb_model:
+            st.write("XGBoost Model Performance Metrics:")
+            st.write(f"RMSE: {xgb_model['metrics']['rmse']}")
+            st.write(f"MAE: {xgb_model['metrics']['mae']}")
+            st.write(f"R2: {xgb_model['metrics']['r2']}")
+        else:
+            st.warning("XGBoost model performance is unavailable. Train the model first.")
 
+    with tab5:
+        st.subheader("Train Full Model")
+        st.markdown("### Train Model on Full Dataset")
+
+        if st.button("Train Full Model"):
+            best_xgb_model, best_xgb_model_full = save_and_train_full_model(best_xgb_model, train_df_merged)
+            st.write(f"Tuned model saved to 'best_xgb_model_tuned.pkl'")
+            st.write(f"Full trained model saved to 'best_xgb_model_full_trained.pkl'")
+# Prediction and Visualization Page
+elif pages == "Prediction & Visualization":
+    st.title("Prediction & Visualization 🔮")
+
+    tab1, tab2 = st.tabs(["Make Predictions", "Visualize Predictions"])
+
+    with tab1:
+        st.subheader("Make Predictions")
+        st.markdown("### Load and Use the Trained Model")
+
+        model_path = 'best_xgb_model_full_trained.pkl'
+        try:
+            loaded_model = joblib.load(model_path)
+            st.write(f"Model loaded from {model_path}")
+
+        
+            Test_df_future_sale = predict_sales_for_test_df(test_df_merged, model_path)
+            
+            # Display some predictions
+            st.write("Here are some predictions:")
+            st.write(Test_df_future_sale[['Date', 'Predicted_Sales']])
+
+        except FileNotFoundError:
+            st.error(f"Model file not found at {model_path}. Please train and save a model first.")
+        except KeyError as e:
+            st.error(f"Error: {e}")
+            st.write("Available columns in test_df_merged:", test_df_merged.columns.tolist())
+        except Exception as e:
+            st.error(f"Unexpected error: {e}")
+    with tab2:
+            st.subheader("Visualize Predictions")
+            st.markdown("### Predicted vs The last two months of the sales history")
+            st.image('/Users/mustafaaldabbas/Documents/GitHub/Rossmann-sales-prediction/Visuals/streamlit pics /Prediction.png', width=1000)  # Update this path
+
+   
 
 
 # Conclusion Page
@@ -154,7 +348,7 @@ elif pages == "Conclusion":
     ### Key Takeaways
     - **Accurate Sales Predictions:** The model provides reliable predictions to assist Rossmann in sales planning.
     - **Actionable Insights:** The analysis identified key factors influencing sales, providing valuable insights for business decisions.
-    
+
     ### Next Steps
     Consider using these predictions to optimize inventory, staffing, and promotional strategies across stores.
     """)

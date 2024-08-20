@@ -20,6 +20,8 @@ import joblib
 from sklearn.preprocessing import StandardScaler
 from sklearn.cluster import KMeans
 import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
+import streamlit as st
 
 #-----------------------------------------------------------------------------------#
 #-----------------------------------------------------------------------------------#
@@ -166,7 +168,6 @@ def clean_and_merge_datasets(train_df, test_df, store_df):
 #-----------------------------------------------------------------------------------#
  
 
-
 def plot_and_transform_sales(df, column='Sales'):
     """
     Plots the distribution of the sales data and applies a log transformation.
@@ -179,25 +180,27 @@ def plot_and_transform_sales(df, column='Sales'):
         pd.DataFrame: The DataFrame with the transformed sales column.
     """
     # Plot the distribution of the target variable before transformation
+    plt.figure(figsize=(10, 6))
     sns.histplot(df[column], kde=True)
     plt.title(f'Distribution of {column}')
-    plt.show()
+    plt.tight_layout()
+    st.pyplot(plt)  # Display the plot in Streamlit
 
     # Apply log transformation
     df[column] = np.log1p(df[column])
 
     # Plot the distribution after log transformation
+    plt.figure(figsize=(10, 6))
     sns.histplot(df[column], kde=True)
     plt.title(f'Distribution of Log-Transformed {column}')
-    plt.show()
+    plt.tight_layout()
+    st.pyplot(plt)  # Display the plot in Streamlit
 
     return df
+
 #-----------------------------------------------------------------------------------#
 #-----------------------------------------------------------------------------------#
 
-
-import seaborn as sns
-import matplotlib.pyplot as plt
 
 def univariate_eda(df):
     """
@@ -230,10 +233,17 @@ def univariate_eda(df):
     sns.histplot(df['CompetitionDistance'], bins=50, kde=True, ax=axes[1, 1])
     axes[1, 1].set_title('Distribution of Competition Distance')
 
+    # Adjust layout
     plt.tight_layout()
-    plt.show()
+
+    # Display the figure in Streamlit
+    st.pyplot(fig)
 #-----------------------------------------------------------------------------------#
 #-----------------------------------------------------------------------------------#
+
+import seaborn as sns
+import matplotlib.pyplot as plt
+import streamlit as st
 
 def bivariate_eda(df):
     """
@@ -248,25 +258,32 @@ def bivariate_eda(df):
         None: The function outputs the plots directly.
     """
     # Sales vs Promo
-    plt.figure(figsize=(10, 6))
+    plt.figure(figsize=(5, 3))
     sns.boxplot(x='Promo', y='Sales', data=df)
     plt.title('Sales vs Promo')
-    plt.show()
+    plt.tight_layout()
+    st.pyplot(plt)  # Display the plot in Streamlit
 
     # Sales vs StoreType
-    plt.figure(figsize=(10, 6))
+    plt.figure(figsize=(5, 3))
     sns.boxplot(x='StoreType', y='Sales', data=df)
     plt.title('Sales vs StoreType')
-    plt.show()
+    plt.tight_layout()
+    st.pyplot(plt)  # Display the plot in Streamlit
 
     # Sales vs CompetitionDistance
-    plt.figure(figsize=(10, 6))
+    plt.figure(figsize=(5, 3))
     sns.scatterplot(x='CompetitionDistance', y='Sales', data=df)
     plt.title('Sales vs Competition Distance')
-    plt.show()
+    plt.tight_layout()
+    st.pyplot(plt)  # Display the plot in Streamlit
+#-----------------------------------------------------------------------------------#
+#-----------------------------------------------------------------------------------#
 
-#-----------------------------------------------------------------------------------#
-#-----------------------------------------------------------------------------------#
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+import streamlit as st
 
 def timeseries_eda(df, date_col='Date', sales_col='Sales'):
     """
@@ -290,60 +307,35 @@ def timeseries_eda(df, date_col='Date', sales_col='Sales'):
     df.groupby(date_col)[sales_col].sum().plot()
     plt.title('Total Sales Over Time')
     plt.ylabel(sales_col)
-    plt.show()
+    plt.tight_layout()
+    st.pyplot(plt)  # Display the plot in Streamlit
 
     # Sales by DayOfWeek
     plt.figure(figsize=(10, 6))
     sns.boxplot(x='DayOfWeek', y=sales_col, data=df)
     plt.title('Sales by Day of the Week')
-    plt.show()
+    plt.tight_layout()
+    st.pyplot(plt)  # Display the plot in Streamlit
 
     # Sales by Month
     df['Month'] = df[date_col].dt.month
     plt.figure(figsize=(10, 6))
     sns.boxplot(x='Month', y=sales_col, data=df)
     plt.title('Sales by Month')
-    plt.show()
+    plt.tight_layout()
+    st.pyplot(plt)  # Display the plot in Streamlit
 
+
+#-----------------------------------------------------------------------------------#
+#-----------------------------------------------------------------------------------#
 
 
 #-----------------------------------------------------------------------------------#
 #-----------------------------------------------------------------------------------#
 
-
-def correlation_heatmap(df, target_col='Sales'):
-    """
-    Generates and displays a correlation heatmap for numerical features in the DataFrame.
-    Additionally, it prints the correlations of all features with the target column.
-
-    Args:
-        df (pd.DataFrame): The DataFrame containing the data to analyze.
-        target_col (str): The name of the target column to display correlations against. Defaults to 'Sales'.
-    
-    Returns:
-        pd.Series: Correlation values of all features with the target column.
-    """
-    # Select only the numeric columns
-    numeric_columns = df.select_dtypes(include=['number'])
-
-    # Calculate the correlation matrix for the numerical features
-    corr_matrix = numeric_columns.corr()
-
-    # Plot the heatmap
-    plt.figure(figsize=(14, 8))
-    sns.heatmap(corr_matrix, annot=True, fmt=".2f", cmap="coolwarm", vmin=-1, vmax=1)
-    plt.title('Correlation Heatmap')
-    plt.show()
-
-    # Display the correlation matrix to identify strong correlations with the target column
-    corr_target = corr_matrix[target_col].sort_values(ascending=False)
-    print(corr_target)
-    
-    return corr_target
-
-
-#-----------------------------------------------------------------------------------#
-#-----------------------------------------------------------------------------------#
+import seaborn as sns
+import matplotlib.pyplot as plt
+import streamlit as st
 
 def plot_sales_by_promo(df):
     """
@@ -357,16 +349,16 @@ def plot_sales_by_promo(df):
     """
     # Calculate average sales for promo vs non-promo days
     sales_by_promo = df.groupby('Promo')['Sales'].mean()
-    print(sales_by_promo)
 
-    # Plotting the sales by promotion status
-    plt.figure(figsize=(4, 3))
-    sales_by_promo.plot(kind='bar', color='orange')
-    plt.xlabel('Promotion Status (0 = No, 1 = Yes)')
+    # Plotting the sales by promotion
+    plt.figure(figsize=(8, 6))
+    sns.barplot(x='Promo', y='Sales', data=df, ci=None, palette='Set2')
+    plt.xlabel('Promotion (0 = No, 1 = Yes)')
     plt.ylabel('Average Sales')
-    plt.title('Average Sales with and without Promotions')
-    plt.xticks(rotation=0)
-    plt.show()
+    plt.title('Average Sales by Promotion')
+    plt.tight_layout()
+    st.pyplot(plt)  # Display the plot in Streamlit
+
 
 
 
@@ -376,6 +368,10 @@ def plot_sales_by_promo(df):
 
 #-----------------------------------------------------------------------------------#
 #-----------------------------------------------------------------------------------#
+
+import pandas as pd
+import matplotlib.pyplot as plt
+import streamlit as st
 
 def plot_sales_by_competition_distance(df, bins=10):
     """
@@ -388,18 +384,30 @@ def plot_sales_by_competition_distance(df, bins=10):
     Returns:
     None: Displays a line chart of average sales by competition distance.
     """
+    # Check if the required columns exist in the DataFrame
+    if 'CompetitionDistance' not in df.columns or 'Sales' not in df.columns:
+        st.error("The required columns ('CompetitionDistance', 'Sales') are not present in the DataFrame.")
+        return
+    
+    # Drop rows with missing values in the relevant columns
+    df = df.dropna(subset=['CompetitionDistance', 'Sales'])
+
     # Analyze sales against competition distance
-    sales_by_competition_distance = df.groupby(pd.cut(df['CompetitionDistance'], bins=bins))['Sales'].mean()
-    print(sales_by_competition_distance)
+    try:
+        sales_by_competition_distance = df.groupby(pd.cut(df['CompetitionDistance'], bins=bins))['Sales'].mean()
+    except Exception as e:
+        st.error(f"Error during analysis: {e}")
+        return
 
     # Plotting the sales by competition distance
-    plt.figure(figsize=(6, 3))
+    plt.figure(figsize=(8, 6))
     sales_by_competition_distance.plot(kind='line', marker='o', color='green')
     plt.xlabel('Competition Distance (binned)')
     plt.ylabel('Average Sales')
     plt.title('Average Sales by Competition Distance')
     plt.xticks(rotation=45)
-    plt.show()
+    plt.tight_layout()
+    st.pyplot(plt)  # Display the plot in Streamlit
 
 
 
@@ -408,6 +416,9 @@ def plot_sales_by_competition_distance(df, bins=10):
 #-----------------------------------------------------------------------------------#
 
 
+
+import matplotlib.pyplot as plt
+import streamlit as st
 
 def plot_sales_by_school_holiday(df):
     """
@@ -429,13 +440,17 @@ def plot_sales_by_school_holiday(df):
     plt.ylabel('Average Sales')
     plt.title('Average Sales on School Holidays vs Non-School Holidays')
     plt.xticks(rotation=0)
-    plt.show()
+    plt.tight_layout()
+    st.pyplot(plt)  # Display the plot in Streamlit
 
 #
 
 
 #-----------------------------------------------------------------------------------#
 #-----------------------------------------------------------------------------------#
+
+import matplotlib.pyplot as plt
+import streamlit as st
 
 def plot_sales_by_store_type_and_assortment(df):
     """
@@ -457,7 +472,8 @@ def plot_sales_by_store_type_and_assortment(df):
     plt.ylabel('Average Sales')
     plt.title('Average Sales by Store Type')
     plt.xticks(rotation=0)
-    plt.show()
+    plt.tight_layout()
+    st.pyplot(plt)  # Display the plot in Streamlit
 
     # Calculate average sales by assortment
     sales_by_assortment = df.groupby('Assortment')['Sales'].mean()
@@ -469,15 +485,19 @@ def plot_sales_by_store_type_and_assortment(df):
     plt.ylabel('Average Sales')
     plt.title('Average Sales by Assortment Type')
     plt.xticks(rotation=0)
-    plt.show()
-
-
-
+    plt.tight_layout()
+    st.pyplot(plt)  # Display the plot in Streamlit
 
 
 #-----------------------------------------------------------------------------------#
 #-----------------------------------------------------------------------------------#
 
+
+import pandas as pd
+import matplotlib.pyplot as plt
+import streamlit as st
+from sklearn.cluster import KMeans
+from sklearn.preprocessing import StandardScaler
 
 def perform_store_clustering(df, n_clusters=3, max_clusters=10):
     """
@@ -526,7 +546,7 @@ def perform_store_clustering(df, n_clusters=3, max_clusters=10):
     plt.xlabel('Number of Clusters')
     plt.ylabel('WCSS')
     plt.title('Elbow Method for Optimal Number of Clusters')
-    plt.show()
+    st.pyplot(plt)  # Display the plot in Streamlit
 
     # Applying K-means clustering with the chosen number of clusters
     kmeans = KMeans(n_clusters=n_clusters, random_state=42)
@@ -538,15 +558,16 @@ def perform_store_clustering(df, n_clusters=3, max_clusters=10):
     # Analyze the characteristics of each cluster by calculating the mean of each feature within clusters
     cluster_analysis = store_clustering_data.groupby('Cluster').mean()
 
-    # Display the cluster analysis
-    print(cluster_analysis)
+    # Display the cluster analysis using Streamlit
+    st.write("Cluster Analysis:")
+    st.write(cluster_analysis)
 
     # Plotting the cluster centers for visualization
     plt.figure(figsize=(12, 6))
     cluster_analysis[['Sales', 'Customers', 'Promo', 'CompetitionDistance']].plot(kind='bar')
     plt.title('Cluster Analysis: Sales, Customers, Promo, and Competition Distance by Cluster')
     plt.xticks(rotation=0)
-    plt.show()
+    st.pyplot(plt)  # Display the plot in Streamlit
 
     return store_clustering_data
 
@@ -556,8 +577,9 @@ def perform_store_clustering(df, n_clusters=3, max_clusters=10):
 
 #-----------------------------------------------------------------------------------#
 #-----------------------------------------------------------------------------------#
-
-
+import pandas as pd
+import numpy as np
+from sklearn.preprocessing import LabelEncoder
 
 def feature_engineering(train_df_merged, test_df_merged):
     # Extract date-related features
@@ -567,57 +589,66 @@ def feature_engineering(train_df_merged, test_df_merged):
         df['Year'] = df['Date'].dt.year
         df['WeekOfYear'] = df['Date'].dt.isocalendar().week
 
+    print("Date-related features added:", train_df_merged.columns)
+
     # Create binary features for holidays and promotions
     for df in [train_df_merged, test_df_merged]:
         df['IsHoliday'] = df['StateHoliday'].apply(lambda x: 1 if x != '0' else 0)
         df['IsPromo'] = df['Promo'].apply(lambda x: 1 if x == 1 else 0)
+
+    print("Binary features added:", train_df_merged.columns)
 
     # Calculate competition duration in months
     for df in [train_df_merged, test_df_merged]:
         df['CompetitionOpenSince'] = 12 * (df['Year'] - df['CompetitionOpenSinceYear']) + (df['Month'] - df['CompetitionOpenSinceMonth'])
         df['CompetitionOpenSince'] = df['CompetitionOpenSince'].apply(lambda x: max(x, 0))
 
+    print("Competition features added:", train_df_merged.columns)
+
     # Calculate Promo2 duration in weeks
     for df in [train_df_merged, test_df_merged]:
         df['Promo2OpenSince'] = 52 * (df['Year'] - df['Promo2SinceYear']) + (df['WeekOfYear'] - df['Promo2SinceWeek'])
         df['Promo2OpenSince'] = df['Promo2OpenSince'].apply(lambda x: max(x, 0))
 
-    # Convert 'StateHoliday' to strings and apply Label Encoding
+    print("Promo2 features added:", train_df_merged.columns)
+
+    # Label Encoding for 'StateHoliday'
     label_encoder = LabelEncoder()
     for df in [train_df_merged, test_df_merged]:
         df['StateHoliday'] = df['StateHoliday'].astype(str)
-    train_df_merged['StateHoliday'] = label_encoder.fit_transform(train_df_merged['StateHoliday'])
-    test_df_merged['StateHoliday'] = label_encoder.transform(test_df_merged['StateHoliday'])
+        df['StateHoliday'] = label_encoder.fit_transform(df['StateHoliday'])
 
-    # One-Hot Encoding for categorical variables
-    train_df_merged = pd.get_dummies(train_df_merged, columns=['StoreType', 'Assortment', 'PromoInterval'], drop_first=True)
-    test_df_merged = pd.get_dummies(test_df_merged, columns=['StoreType', 'Assortment', 'PromoInterval'], drop_first=True)
+    print("Label encoding applied:", train_df_merged.columns)
+
+    # One-Hot Encoding for categorical variables (check if the columns exist)
+    for col in ['StoreType', 'Assortment', 'PromoInterval']:
+        if col in train_df_merged.columns:
+            train_df_merged = pd.get_dummies(train_df_merged, columns=[col], drop_first=True)
+        if col in test_df_merged.columns:
+            test_df_merged = pd.get_dummies(test_df_merged, columns=[col], drop_first=True)
 
     # Align columns between train and test sets
     test_df_merged = test_df_merged.reindex(columns=train_df_merged.columns, fill_value=0)
+    print("One-hot encoding applied and columns aligned:", train_df_merged.columns)
 
-    # Create lag features
+    # Lag Features for Sales
     for lag in [1, 7, 30]:
-        train_df_merged[f'Customers_Lag_{lag}'] = train_df_merged['Customers'].shift(lag)
-        test_df_merged[f'Customers_Lag_{lag}'] = test_df_merged['Customers'].shift(lag)
-        train_df_merged[f'Open_Lag_{lag}'] = train_df_merged['Open'].shift(lag)
-        test_df_merged[f'Open_Lag_{lag}'] = test_df_merged['Open'].shift(lag)
+        train_df_merged[f'Sales_Lag_{lag}'] = train_df_merged['Sales'].shift(lag)
+        test_df_merged[f'Sales_Lag_{lag}'] = train_df_merged['Sales'].shift(lag)
     
-    # Fill NaN values
-    train_df_merged.fillna(0, inplace=True)
-    test_df_merged.fillna(0, inplace=True)
+    print("Lag features for Sales added:", train_df_merged.columns)
 
     # Create moving average features for 'Sales' and 'Customers'
     for window in [7, 30]:
         train_df_merged[f'Sales_MA_{window}'] = train_df_merged['Sales'].rolling(window=window).mean()
-        test_df_merged[f'Sales_MA_{window}'] = train_df_merged['Sales'].rolling(window=window).mean()
         train_df_merged[f'Customers_MA_{window}'] = train_df_merged['Customers'].rolling(window=window).mean()
-        test_df_merged[f'Customers_MA_{window}'] = train_df_merged['Customers'].rolling(window=window).mean()
-    
-    # Drop NaN values caused by the rolling operation in the train set
-    train_df_merged.dropna(inplace=True)
 
-    # Apply Sine and Cosine Transformations to cyclical features
+        test_df_merged[f'Sales_MA_{window}'] = train_df_merged['Sales'].rolling(window=window).mean()
+        test_df_merged[f'Customers_MA_{window}'] = train_df_merged['Customers'].rolling(window=window).mean()
+
+    print("Moving average features added:", train_df_merged.columns)
+
+    # Sine and Cosine Transformations for Cyclical Features
     for df in [train_df_merged, test_df_merged]:
         df['DayOfWeek_Sin'] = np.sin(2 * np.pi * df['DayOfWeek'] / 7)
         df['DayOfWeek_Cos'] = np.cos(2 * np.pi * df['DayOfWeek'] / 7)
@@ -626,28 +657,37 @@ def feature_engineering(train_df_merged, test_df_merged):
         df['WeekOfYear_Sin'] = np.sin(2 * np.pi * df['WeekOfYear'] / 52)
         df['WeekOfYear_Cos'] = np.cos(2 * np.pi * df['WeekOfYear'] / 52)
 
-    return train_df_merged, test_df_merged
+    print("Sine and cosine transformations added:", train_df_merged.columns)
 
-#-----------------------------------------------------------------------------------#
-def split_and_separate_features(train_df_merged, cutoff_date='2015-06-01'):
-    # Split the dataset into training and test sets based on the cutoff date
-    train_set = train_df_merged[train_df_merged['Date'] < cutoff_date]
-    test_set = train_df_merged[train_df_merged['Date'] >= cutoff_date]
+    # Handle NaN values created by lag and rolling operations
+    train_df_merged.dropna(inplace=True)
+    test_df_merged.fillna(0, inplace=True)
 
-    # Separate features and target variable for training and testing
-    X_train = train_set.drop(columns=['Sales', 'Date', 'Customers', 'Open'])
-    y_train = train_set['Sales']
+    print("Final columns after NaN handling:", train_df_merged.columns)
+    
+    # Prepare features and target
+    feature_cols = [col for col in train_df_merged.columns if col not in ['Sales', 'Date']]
+    target_col = 'Sales'
+    
+    X = train_df_merged[feature_cols]
+    y = train_df_merged[target_col]
+    
+    # Ensure the DataFrame is sorted by date
+    train_df_merged = train_df_merged.sort_values(by='Date')
+    
+    # Split the data chronologically
+    split_date = train_df_merged['Date'].max() - pd.DateOffset(months=6)  # 6 months before the last date
+    train_df = train_df_merged[train_df_merged['Date'] < split_date]
+    test_df = train_df_merged[train_df_merged['Date'] >= split_date]
+    
+    X_train = train_df[feature_cols]
+    y_train = train_df[target_col]
+    X_test = test_df[feature_cols]
+    y_test = test_df[target_col]
 
-    X_test = test_set.drop(columns=['Sales', 'Date', 'Open', 'Customers'])
-    y_test = test_set['Sales']
+    return test_df_merged, train_df_merged, X_train, X_test, y_train, y_test
 
-    # Print the split verification
-    print("Training set shape:", X_train.shape)
-    print("Test set shape:", X_test.shape)
-    print("Training set date range:", train_set['Date'].min(), "to", train_set['Date'].max())
-    print("Test set date range:", test_set['Date'].min(), "to", test_set['Date'].max())
 
-    return X_train, y_train, X_test, y_test
 
 
 #-----------------------------------------------------------------------------------#
@@ -802,90 +842,17 @@ def train_and_evaluate_xgboost(X_train, y_train, X_test, y_test, n_estimators=10
 
 #-----------------------------------------------------------------------------------
 
-
-def train_and_evaluate_lightgbm(X_train, y_train, X_test, y_test, n_estimators=100, max_depth=10, random_state=42):
-    """
-    Converts data types, cleans feature names, trains a LightGBM model, and evaluates it on the test set.
-
-    Args:
-        X_train (pd.DataFrame): The training features.
-        y_train (pd.Series): The training target.
-        X_test (pd.DataFrame): The testing features.
-        y_test (pd.Series): The testing target.
-        n_estimators (int): Number of boosting rounds. Defaults to 100.
-        max_depth (int): Maximum depth of the trees. Defaults to 10.
-        random_state (int): Random seed for reproducibility. Defaults to 42.
-
-    Returns:
-        dict: A dictionary containing the model, predictions, and evaluation metrics (RMSE, MAE, R-squared).
-    """
-    # Convert specific columns to float
-    columns_to_convert = ['WeekOfYear', 'WeekOfYear_Sin', 'WeekOfYear_Cos']
-    for col in columns_to_convert:
-        X_train[col] = X_train[col].astype(float)
-        X_test[col] = X_test[col].astype(float)
-    
-    # Clean the feature names by replacing special characters with underscores
-    X_train.columns = X_train.columns.str.replace('[^A-Za-z0-9_]+', '', regex=True)
-    X_test.columns = X_test.columns.str.replace('[^A-Za-z0-9_]+', '', regex=True)
-
-    # Verify the cleaned feature names
-    print("Cleaned feature names in X_train:", X_train.columns)
-
-    # Check the data types of the specific columns
-    print("Data types of specific columns in X_train:", X_train[columns_to_convert].dtypes)
-
-    # Initialize the LightGBM Regressor
-    lgb_model = lgb.LGBMRegressor(n_estimators=n_estimators, max_depth=max_depth, random_state=random_state)
-
-    # Train the model on the training data
-    lgb_model.fit(X_train, y_train)
-
-    # Predict on the test set
-    y_test_pred_lgb = lgb_model.predict(X_test)
-
-    # Evaluate model performance on the test set
-    test_rmse_lgb = mean_squared_error(y_test, y_test_pred_lgb, squared=False)
-    test_mae_lgb = mean_absolute_error(y_test, y_test_pred_lgb)
-    test_r2_lgb = r2_score(y_test, y_test_pred_lgb)
-
-    # Print the evaluation metrics
-    print(f"LightGBM Test RMSE: {test_rmse_lgb}")
-    print(f"LightGBM Test MAE: {test_mae_lgb}")
-    print(f"LightGBM Test R-squared: {test_r2_lgb}")
-
-    # Return the model and evaluation metrics
-    return {
-        'model': lgb_model,
-        'predictions': y_test_pred_lgb,
-        'metrics': {
-            'rmse': test_rmse_lgb,
-            'mae': test_mae_lgb,
-            'r2': test_r2_lgb
-        }
-    }
-
-
-
-
-#-----------------------------------------------------------------------------------
-
-
-from sklearn.model_selection import GridSearchCV
-import xgboost as xgb
-from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
-
 def tune_and_evaluate_xgboost(X_train, y_train, X_test, y_test):
     # Define the model
     xgb_model = xgb.XGBRegressor(random_state=42, enable_categorical=True)
 
     # Define the grid of hyperparameters
     param_grid = {
-        'n_estimators': [100, 200],
-        'max_depth': [6, 10, 15],
-        'learning_rate': [0.01, 0.1, 0.2],
-        'subsample': [0.8, 1.0],
-        'colsample_bytree': [0.8, 1.0]
+        'n_estimators': [200],
+        'max_depth': [10],
+        'learning_rate': [ 0.2],
+        'subsample': [1.0],
+        'colsample_bytree': [0.8]
     }
 
     # Set up the grid search
@@ -915,75 +882,70 @@ def tune_and_evaluate_xgboost(X_train, y_train, X_test, y_test):
     print(f"Best XGBoost Test MAE: {test_mae_best_xgb}")
     print(f"Best XGBoost Test R-squared: {test_r2_best_xgb}")
 
-    return best_xgb_model, test_rmse_best_xgb, test_mae_best_xgb, test_r2_best_xgb
+    return best_xgb_model, test_rmse_best_xgb, test_mae_best_xgb, test_r2_best_xgb, grid_search
+
 
 
 
 
 #-----------------------------------------------------------------------------------
 
+import pandas as pd
+import matplotlib.pyplot as plt
+import streamlit as st
 
-
-def create_display_and_visualize_model_results(grid_search, test_rmse, test_mae, test_r2):
+def create_display_and_visualize_model_results():
     """
     Creates a DataFrame summarizing the results of different models, displays it, and visualizes the results.
-    
-    Parameters:
-    - grid_search: The GridSearchCV object used to tune the XGBoost model.
-    - test_rmse: RMSE of the tuned XGBoost model on the test set.
-    - test_mae: MAE of the tuned XGBoost model on the test set.
-    - test_r2: R-squared of the tuned XGBoost model on the test set.
     
     Returns:
     - results_df: A DataFrame summarizing the performance and hyperparameters of each model.
     """
     
-    # Define the results for each model
+    # Define the results for each model using the results you shared
     model_results = {
-        'Model': ['Random Forest', 'XGBoost', 'XGBoost (Tuned)', 'LightGBM'],
-        'RMSE': [0.4511, 0.2893, test_rmse, 0.4372],
-        'MAE': [0.2217, 0.0751, test_mae, 0.1960],
-        'R-squared': [0.9786, 0.9912, test_r2, 0.9799],
-        'Hyperparameters': [
-            'n_estimators=100, max_depth=10',  # Random Forest parameters
-            'n_estimators=100, max_depth=10',  # XGBoost parameters
-            str(grid_search.best_params_),     # Tuned XGBoost best parameters
-            'n_estimators=100, max_depth=10'   # LightGBM parameters
-        ]
+        'Model': ['Random Forest', 'XGBoost', 'XGBoost (Tuned)'],
+        'RMSE': [0.44946992012881254, 0.29817999295162884, 0.2892128493088795],
+        'MAE': [0.22129262422877377, 0.07588247725820102, 0.07769083766709649],
+        'R-squared': [0.9787274724229729, 0.9906378664909703, 0.9911924929785798]
     }
 
     # Create a DataFrame from the results
     results_df = pd.DataFrame(model_results)
 
-    # Display the DataFrame
-    print(results_df)
+    # Display the DataFrame in Streamlit
+    st.write("### Model Performance Results")
+    st.write(results_df)
 
-    # Visualize the RMSE of each model
-    plt.figure(figsize=(10, 6))
-    plt.barh(results_df['Model'], results_df['RMSE'], color='skyblue')
-    plt.xlabel('RMSE')
-    plt.title('Model RMSE Comparison')
-    plt.show()
+    ### Plot: Comparison of RMSE, MAE, and R-squared for the models
+    fig, ax1 = plt.subplots(figsize=(8, 6))
 
-    # Visualize the MAE of each model
-    plt.figure(figsize=(10, 6))
-    plt.barh(results_df['Model'], results_df['MAE'], color='lightcoral')
-    plt.xlabel('MAE')
-    plt.title('Model MAE Comparison')
-    plt.show()
+    bar_width = 0.2
+    index = range(3)
 
-    # Visualize the R-squared of each model
-    plt.figure(figsize=(10, 6))
-    plt.barh(results_df['Model'], results_df['R-squared'], color='lightgreen')
-    plt.xlabel('R-squared')
-    plt.title('Model R-squared Comparison')
-    plt.show()
+    # Plot RMSE and MAE on the first y-axis
+    bars1 = ax1.bar([i - bar_width/2 for i in index], results_df['RMSE'], bar_width, label='RMSE', color='skyblue')
+    bars2 = ax1.bar([i + bar_width/2 for i in index], results_df['MAE'], bar_width, label='MAE', color='lightcoral')
+
+    ax1.set_xlabel('Model')
+    ax1.set_ylabel('RMSE / MAE')
+    ax1.set_title('Model Performance Comparison (Random Forest, XGBoost, XGBoost Tuned)')
+    ax1.set_xticks(index)
+    ax1.set_xticklabels(results_df['Model'])
+
+    # Create a second y-axis for R-squared
+    ax2 = ax1.twinx()
+    bars3 = ax2.bar([i + 1.5 * bar_width for i in index], results_df['R-squared'], bar_width, label='R-squared', color='lightgreen')
+    ax2.set_ylabel('R-squared')
+
+    # Combine legends from both axes
+    ax1.legend(loc='upper left')
+    ax2.legend(loc='upper right')
+
+    # Display the plot in Streamlit
+    st.pyplot(fig)
 
     return results_df
-
-
-
-
 
 #-----------------------------------------------------------------------------------#
 import joblib
@@ -1024,132 +986,156 @@ def save_and_train_full_model(best_xgb_model, train_df_merged, tuned_model_path=
 
 
 
+#-----------------------------------------------------------------------------------##-----------------------------------------------------------------------------------#
 #-----------------------------------------------------------------------------------#
 
+import pandas as pd
+import joblib
 
-#-----------------------------------------------------------------------------------#
-#-----------------------------------------------------------------------------------#
-def predict_future_sales(test_df_merged, model_path='best_xgb_model_full_trained.pkl', output_csv='predicted_sales_test_df_merged.csv'):
+def predict_sales_for_test_df(test_df_merged, model_path='best_xgb_model_full_trained.pkl'):
     """
-    Aligns the test dataset with the training dataset columns, predicts future sales, 
-    and saves the predictions to a CSV file.
+    Predicts sales for the test_df_merged dataset using the trained model.
     
     Parameters:
-    - test_df_merged: The test DataFrame that needs to be aligned and predicted.
-    - model_path: Path to the trained model to be used for prediction.
-    - output_csv: Path to the output CSV file where predictions will be saved.
+    - test_df_merged: The DataFrame containing the test data with pre-engineered features.
+    - model_path: Path to the trained model.
     
     Returns:
-    - test_df_merged: The test DataFrame with the predicted sales added.
+    - result_df: DataFrame with the predicted sales and dates, sorted by Date.
     """
-    
-    # Define the common columns to ensure alignment between train and test sets
-    common_columns = ['Store', 'DayOfWeek', 'Promo', 'StateHoliday', 'SchoolHoliday', 
-                      'CompetitionDistance', 'CompetitionOpenSinceMonth', 
-                      'CompetitionOpenSinceYear', 'Promo2', 'Promo2SinceWeek', 
-                      'Promo2SinceYear', 'Month', 'Year', 'WeekOfYear', 
-                      'IsHoliday', 'IsPromo', 'CompetitionOpenSince', 
-                      'Promo2OpenSince', 'StoreType_b', 'StoreType_c', 
-                      'StoreType_d', 'Assortment_b', 'Assortment_c', 
-                      'PromoInterval_Jan,Apr,Jul,Oct', 'PromoInterval_Mar,Jun,Sept,Dec', 
-                      'PromoInterval_None', 'Sales_Lag_1', 'Sales_Lag_7', 
-                      'Sales_Lag_30', 'Customers_Lag_1', 'Customers_Lag_7', 
-                      'Customers_Lag_30', 'Open_Lag_1', 'Open_Lag_7', 
-                      'Open_Lag_30', 'Sales_MA_7', 'Sales_MA_30', 
-                      'Customers_MA_7', 'Customers_MA_30', 'DayOfWeek_Sin', 
-                      'DayOfWeek_Cos', 'Month_Sin', 'Month_Cos', 
-                      'WeekOfYear_Sin', 'WeekOfYear_Cos']
-
-    # Identify missing columns in test_df_merged
-    missing_columns = [col for col in common_columns if col not in test_df_merged.columns]
-    if missing_columns:
-        print("Missing columns in test_df_merged:", missing_columns)
-        # Add the missing columns with default values (0)
-        for col in missing_columns:
-            test_df_merged[col] = 0
-
-    # Reorder the test_df_merged columns to match the training data order
-    X_test_full = test_df_merged[common_columns]
 
     # Load the trained model
     best_xgb_model_full = joblib.load(model_path)
 
-    # Predict sales for the entire timeframe of the test set
-    predicted_sales = best_xgb_model_full.predict(X_test_full)
+    # Extract the feature names used during training
+    training_features = best_xgb_model_full.get_booster().feature_names
+    
+    # Store the 'Date' column to add it back later
+    dates = test_df_merged['Date'].copy()
 
-    # Optionally, add the predictions to the test_df_merged DataFrame
-    test_df_merged['Predicted_Sales'] = predicted_sales
+    # Ensure the test_df_merged has the same features as the training set
+    test_df_merged = test_df_merged.copy()  # Create a copy to avoid modifying the original DataFrame
+    
+    # Select only the columns needed for prediction
+    test_df_merged = test_df_merged[training_features]
 
-    # Save the predictions to a CSV file
-    test_df_merged.to_csv(output_csv, index=False)
+    # Predict sales for the test set
+    test_df_merged['Predicted_Sales'] = best_xgb_model_full.predict(test_df_merged)
+    
+    # Add the 'Date' column back
+    test_df_merged['Date'] = dates
+
+    # Sort the DataFrame by 'Date' in ascending order
+    test_df_merged = test_df_merged.sort_values(by='Date')
 
     return test_df_merged
 
-
 #-----------------------------------------------------------------------------------
 
 
+import matplotlib.pyplot as plt
+import pandas as pd
+import streamlit as st
 
-
-def plot_sales_history_and_predictions(train_df_merged, test_df_merged):
+def plot_sales_comparison_streamlit(train_df_merged, Test_df_future_sale):
     """
-    Plots the historical sales for the last two months and future predicted sales.
+    Plots the comparison of actual sales for the last two months of the training data with predicted sales for Streamlit.
 
     Parameters:
-    - train_df_merged: The training DataFrame with historical sales data.
-    - test_df_merged: The test DataFrame with predicted sales data.
+    - train_df_merged (pd.DataFrame): DataFrame containing the actual sales data with a 'Date' and 'Sales' columns.
+    - Test_df_future_sale (pd.DataFrame): DataFrame containing the predicted sales data with a 'Date' and 'Predicted_Sales' columns.
 
-    The function will display a plot with two subplots: one for the last two months of historical sales and one for future predicted sales.
+    Returns:
+    - None: Displays a plot comparing the actual sales and predicted sales.
     """
-
-    # Ensure 'Date' is in datetime format
+    # Ensure that the 'Date' column is in datetime format
     train_df_merged['Date'] = pd.to_datetime(train_df_merged['Date'])
-    test_df_merged['Date'] = pd.to_datetime(test_df_merged['Date'])
 
-    # Filter the last two months of historical data
-    last_two_months = train_df_merged[train_df_merged['Date'] >= train_df_merged['Date'].max() - pd.DateOffset(months=2)]
+    # Filter the last two months of data from train_df_merged
+    last_two_months_train = train_df_merged[train_df_merged['Date'] >= train_df_merged['Date'].max() - pd.DateOffset(months=2)]
 
-    # Prepare the daily sales for historical data
-    historical_sales = last_two_months.groupby('Date')['Sales'].sum().reset_index()
+    # Ensure the 'Date' column is in datetime format in the prediction DataFrame
+    Test_df_future_sale['Date'] = pd.to_datetime(Test_df_future_sale['Date'])
 
-    # Prepare the daily sales for predicted data
-    future_predictions = test_df_merged.groupby('Date')['Predicted_Sales'].sum().reset_index()
+    # Rename columns for clarity
+    last_two_months_train = last_two_months_train[['Date', 'Sales']].rename(columns={'Sales': 'Actual_Sales'})
+    Test_df_future_sale = Test_df_future_sale[['Date', 'Predicted_Sales']]
 
-    # Create the plot with two subplots
-    plt.figure(figsize=(14, 6))
+    # Combine the two datasets
+    combined_sales = pd.concat([last_two_months_train, Test_df_future_sale])
 
-    # Plot for the last two months of historical data
-    plt.subplot(1, 2, 1)
-    plt.plot(historical_sales['Date'], historical_sales['Sales'], color='blue', label='Historical Sales')
+    plt.figure(figsize=(14, 7))
+
+    # Plot actual sales for the last two months
+    plt.plot(last_two_months_train['Date'], last_two_months_train['Actual_Sales'], label='Actual Sales (Last 2 Months)', color='blue')
+
+    # Plot predicted sales for the entire predicted period
+    plt.plot(Test_df_future_sale['Date'], Test_df_future_sale['Predicted_Sales'], label='Predicted Sales', color='orange', linestyle='--')
+
+    # Add titles and labels
+    plt.title('Actual Sales (Last 2 Months) vs Predicted Sales')
     plt.xlabel('Date')
     plt.ylabel('Sales')
-    plt.title('Historical Sales (Last Two Months)')
-    plt.xticks(rotation=45)
     plt.legend()
+    plt.xticks(rotation=45)
+    plt.grid(True)
 
-    # Plot for the future predictions
-    plt.subplot(1, 2, 2)
-    plt.plot(future_predictions['Date'], future_predictions['Predicted_Sales'], color='orange', label='Predicted Sales')
+    # Show the plot in Streamlit
+    st.pyplot(plt)
+
+
+
+
+#-----------------------------------------------------------------------------------
+
+import matplotlib.pyplot as plt
+import pandas as pd
+
+def plot_sales_comparison(train_df_merged, Test_df_future_sale):
+    """
+    Plots the comparison of actual sales for the last two months of the training data with predicted sales.
+
+    Parameters:
+    - train_df_merged (pd.DataFrame): DataFrame containing the actual sales data with a 'Date' and 'Sales' columns.
+    - Test_df_future_sale (pd.DataFrame): DataFrame containing the predicted sales data with a 'Date' and 'Predicted_Sales' columns.
+
+    Returns:
+    - None: Displays a plot comparing the actual sales and predicted sales.
+    """
+    # Ensure that the 'Date' column is in datetime format
+    train_df_merged['Date'] = pd.to_datetime(train_df_merged['Date'])
+
+    # Filter the last two months of data from train_df_merged
+    last_two_months_train = train_df_merged[train_df_merged['Date'] >= train_df_merged['Date'].max() - pd.DateOffset(months=2)]
+
+    # Ensure the 'Date' column is in datetime format in the prediction DataFrame
+    Test_df_future_sale['Date'] = pd.to_datetime(Test_df_future_sale['Date'])
+
+    # Rename columns for clarity
+    last_two_months_train = last_two_months_train[['Date', 'Sales']].rename(columns={'Sales': 'Actual_Sales'})
+    Test_df_future_sale = Test_df_future_sale[['Date', 'Predicted_Sales']]
+
+    # Combine the two datasets
+    combined_sales = pd.concat([last_two_months_train, Test_df_future_sale])
+
+    plt.figure(figsize=(14, 7))
+
+    # Plot actual sales for the last two months
+    plt.plot(last_two_months_train['Date'], last_two_months_train['Actual_Sales'], label='Actual Sales (Last 2 Months)', color='blue')
+
+    # Plot predicted sales for the entire predicted period
+    plt.plot(Test_df_future_sale['Date'], Test_df_future_sale['Predicted_Sales'], label='Predicted Sales', color='orange', linestyle='--')
+
+    # Add titles and labels
+    plt.title('Actual Sales (Last 2 Months) vs Predicted Sales')
     plt.xlabel('Date')
-    plt.ylabel('Predicted Sales')
-    plt.title('Future Predicted Sales')
-    plt.xticks(rotation=45)
+    plt.ylabel('Sales')
     plt.legend()
+    plt.xticks(rotation=45)
+    plt.grid(True)
 
-    plt.tight_layout()
+    # Show the plot
     plt.show()
-
-
-
-#-----------------------------------------------------------------------------------
-
-
-
-
-
-
-#-----------------------------------------------------------------------------------
-
 
 
 
