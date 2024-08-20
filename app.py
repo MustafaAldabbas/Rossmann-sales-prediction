@@ -344,11 +344,40 @@ elif pages == "Conclusion":
     st.image('/Users/mustafaaldabbas/Documents/GitHub/Rossmann-sales-prediction/Visuals/streamlit pics /conclusion.png', width=1000)  # Update this path
 
     st.title("Conclusion 🏁")
+
     st.markdown("""
-    ### Key Takeaways
+    In this project, we set out to achieve three main objectives: understanding the key factors influencing sales in retail stores, developing a predictive model capable of accurately forecasting sales, and identifying actionable insights to enhance sales performance.
+
+    ### **Summary of Objectives Achieved:**
+
+    **1. Understanding the Key Factors Influencing Sales in Retail Stores:**
+
+    Through exploratory data analysis (EDA), we identified several key factors that significantly impact sales in Rossmann stores. These include:
+
+    - **Promotions:** Promotional periods were found to have a substantial positive effect on sales, indicating the importance of strategic promotional planning.
+
+    - **Store Type and Assortment:** Different store types and assortment strategies showed varying sales patterns, suggesting that tailored strategies for different store types could optimize performance.
+
+    - **Competition:** Proximity to competitors and the duration of their presence were also key factors, highlighting the need for competitive analysis in sales forecasting.
+
+    By analyzing correlations and feature importance from models like Random Forest and XGBoost, we were able to pinpoint the variables that most influence sales. This understanding provides a strong foundation for building effective sales strategies.
+
+    **2. Developing a Predictive Model Capable of Accurately Forecasting Sales:**
+
+    We successfully developed and fine-tuned several predictive models, including Random Forest, XGBoost, and LightGBM, to forecast daily sales. The models were evaluated using key metrics such as RMSE and R², ensuring that the predictions are accurate and reliable. Among these models, [mention the best-performing model] showed the highest accuracy, making it a strong candidate for deployment in a real-world scenario.
+
+    **3. Identifying Actionable Insights to Enhance Sales Performance:**
+
+    - **Promotional Impact:** The strong positive correlation between promotions and sales suggests that Rossmann can drive significant sales increases through well-timed and targeted promotions.
+
+    - **Store-Specific Strategies:** The variations in sales patterns across different store types indicate that Rossmann could benefit from customizing sales strategies based on store characteristics.
+
+    - **Competitor Analysis:** Understanding the competitive landscape and its impact on sales can help Rossmann make informed decisions about store locations and competitive positioning.
+
+    ### **Key Takeaways**
     - **Accurate Sales Predictions:** The model provides reliable predictions to assist Rossmann in sales planning.
     - **Actionable Insights:** The analysis identified key factors influencing sales, providing valuable insights for business decisions.
 
-    ### Next Steps
+    ### **Next Steps**
     Consider using these predictions to optimize inventory, staffing, and promotional strategies across stores.
     """)
