@@ -7,7 +7,7 @@ from PIL import Image
 import io
 from dotenv import load_dotenv
 import os
-import openai
+from openai import OpenAI
 import base64
 
 
@@ -34,7 +34,7 @@ from functions import (
 # Set up the Streamlit app
 st.set_page_config(page_title="Rossmann Sales Forecasting", layout="wide")
 
-load_dotenv()
+
 @st.cache_data
 def load_datasets():
     # Load datasets from CSV files based on the paths you provided
@@ -47,6 +47,9 @@ def load_datasets():
         'test_df': test_df,
         'store_df': store_df
     }
+load_dotenv()
+api_key = os.getenv('api_key')
+print(api_key)
 
 def describe_image(image):
     img_buffer = io.BytesIO()
@@ -54,13 +57,13 @@ def describe_image(image):
     img_buffer.seek(0)
 
     # Set the API key
-    openai.api_key = os.getenv("api_key")
-
+   
+    client = OpenAI(api_key=api_key)
     # Convert image to base64
     base64_image = base64.b64encode(img_buffer.getvalue()).decode('utf-8')
 
-    response = openai.ChatCompletion.create(
-        model="gpt-4-vision-preview",
+    response = client.chat.completions.create(
+        model="gpt-4",
         messages=[
             {
                 "role": "user",
@@ -70,15 +73,16 @@ def describe_image(image):
                         "type": "image_url",
                         "image_url": {
                             "url": f"data:image/png;base64,{base64_image}"
-                        },
-                    },
-                ],
+                        }
+                    }
+                ]
             }
         ],
         max_tokens=300,
-    )
+)
 
     return response.choices[0].message['content']
+
 
 # Load datasets using the `load_datasets` function
 data = load_datasets()
