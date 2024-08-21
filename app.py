@@ -3,6 +3,15 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import joblib
 import seaborn as sns
+from PIL import Image
+import io
+from dotenv import load_dotenv
+import os
+import openai
+import base64
+
+
+
 from functions import (
     load_datasets,
     clean_and_merge_datasets,
@@ -15,16 +24,64 @@ from functions import (
     plot_sales_comparison_streamlit,
     bivariate_eda,
     perform_store_clustering,
-    univariate_eda,
+    univariate_edast,
     plot_sales_by_store_type_and_assortment,
     plot_sales_by_school_holiday,
     plot_sales_by_competition_distance,
     plot_sales_by_promo,
     feature_engineering,
 )
+# Set up the Streamlit app
+st.set_page_config(page_title="Rossmann Sales Forecasting", layout="wide")
+
+load_dotenv()
+@st.cache_data
+def load_datasets():
+    # Load datasets from CSV files based on the paths you provided
+    train_df = pd.read_csv('/Users/mustafaaldabbas/Documents/GitHub/Rossmann-sales-prediction/Datasets/Raw/train.csv')
+    test_df = pd.read_csv('/Users/mustafaaldabbas/Documents/GitHub/Rossmann-sales-prediction/Datasets/Raw/test.csv')
+    store_df = pd.read_csv('/Users/mustafaaldabbas/Documents/GitHub/Rossmann-sales-prediction/Datasets/Raw/store.csv')
+    
+    return {
+        'train_df': train_df,
+        'test_df': test_df,
+        'store_df': store_df
+    }
+
+def describe_image(image):
+    img_buffer = io.BytesIO()
+    image.save(img_buffer, format='PNG')
+    img_buffer.seek(0)
+
+    # Set the API key
+    openai.api_key = os.getenv("api_key")
+
+    # Convert image to base64
+    base64_image = base64.b64encode(img_buffer.getvalue()).decode('utf-8')
+
+    response = openai.ChatCompletion.create(
+        model="gpt-4-vision-preview",
+        messages=[
+            {
+                "role": "user",
+                "content": [
+                    {"type": "text", "text": "Describe this image in detail."},
+                    {
+                        "type": "image_url",
+                        "image_url": {
+                            "url": f"data:image/png;base64,{base64_image}"
+                        },
+                    },
+                ],
+            }
+        ],
+        max_tokens=300,
+    )
+
+    return response.choices[0].message['content']
 
 # Load datasets using the `load_datasets` function
-data = load_datasets('config.yaml')
+data = load_datasets()
 train_df = data['train_df']
 store_df = data['store_df']
 test_df = data['test_df']
@@ -35,8 +92,7 @@ train_df_merged, test_df_merged = clean_and_merge_datasets(train_df, test_df, st
 # **Load the pre-processed test dataframe (processed_test_df.pkl)**
 test_df_merged = pd.read_pickle("processed_test_df.pkl")
 
-# Set up the Streamlit app
-st.set_page_config(page_title="Rossmann Sales Forecasting", layout="wide")
+
 
 # Sidebar Navigation
 st.sidebar.title("Rossmann Sales Forecasting App")
@@ -152,7 +208,19 @@ elif pages == "EDA":
 
     with tab1:
         st.subheader("Univariate Analysis")
-        univariate_eda(train_df_merged) 
+        fig = univariate_edast(train_df_merged)
+        st.pyplot(fig)
+        
+        try:
+            img_buffer = io.BytesIO()
+            fig.savefig(img_buffer, format='png')
+            img_buffer.seek(0)
+            image = Image.open(img_buffer)
+            description = describe_image(image)
+            st.write("AI-Generated Description:")
+            st.write(description)
+        except Exception as e:
+            st.write(f"An error occurred while generating the image description: {str(e)}")
 
     with tab2:
         st.subheader("Bivariate Analysis")
@@ -171,7 +239,6 @@ elif pages == "EDA":
         st.subheader("Sales by Store Type and Assortment")
         plot_sales_by_store_type_and_assortment(train_df_merged)  # Display the plots
 
-# EDA 2 Page
 elif pages == "EDA 2":
     st.title("Exploratory Data Analysis (EDA) 📊")
     tab6, tab7, tab8 = st.tabs([
@@ -192,7 +259,7 @@ elif pages == "EDA 2":
         st.subheader("Sales by Promotion")
         plot_sales_by_promo(train_df_merged)  # Display the sales by promotion plot
 
-# Feature Engineering Page
+
 elif pages == "Feature Engineering":
     st.title("Feature Engineering 🔧")
 
@@ -213,7 +280,6 @@ elif pages == "Feature Engineering":
     st.write("y_train sample:")
     st.write(y_train.head())
 
-# Modeling Page
 elif pages == "Modeling":
     st.title("Modeling 🧠")
 
@@ -228,6 +294,8 @@ elif pages == "Modeling":
         "Model Performance",
         "Train Full Model"
     ])
+
+    # Your code for each tab goes here...
 
     with tab1:
         st.subheader("Train Random Forest")
@@ -302,6 +370,7 @@ elif pages == "Modeling":
             best_xgb_model, best_xgb_model_full = save_and_train_full_model(best_xgb_model, train_df_merged)
             st.write(f"Tuned model saved to 'best_xgb_model_tuned.pkl'")
             st.write(f"Full trained model saved to 'best_xgb_model_full_trained.pkl'")
+
 # Prediction and Visualization Page
 elif pages == "Prediction & Visualization":
     st.title("Prediction & Visualization 🔮")
@@ -331,13 +400,11 @@ elif pages == "Prediction & Visualization":
             st.write("Available columns in test_df_merged:", test_df_merged.columns.tolist())
         except Exception as e:
             st.error(f"Unexpected error: {e}")
+
     with tab2:
-            st.subheader("Visualize Predictions")
-            st.markdown("### Predicted vs The last two months of the sales history")
-            st.image('/Users/mustafaaldabbas/Documents/GitHub/Rossmann-sales-prediction/Visuals/streamlit pics /Prediction.png', width=1000)  # Update this path
-
-   
-
+        st.subheader("Visualize Predictions")
+        st.markdown("### Predicted vs The last two months of the sales history")
+        st.image('/Users/mustafaaldabbas/Documents/GitHub/Rossmann-sales-prediction/Visuals/streamlit pics /Prediction.png', width=1000)  # Update this path
 
 # Conclusion Page
 elif pages == "Conclusion":

@@ -240,7 +240,45 @@ def univariate_eda(df):
     st.pyplot(fig)
 #-----------------------------------------------------------------------------------#
 #-----------------------------------------------------------------------------------#
+def univariate_edast(df):
+    """
+    Performs univariate exploratory data analysis (EDA) on the given DataFrame.
+    
+    The function plots the distributions of Sales, Customers, StoreType, and CompetitionDistance.
+    
+    Args:
+        df (pd.DataFrame): The DataFrame containing the data to analyze.
+    
+    Returns:
+        matplotlib.figure.Figure: The figure object containing all the subplots.
+    """
+    # Set up the figure and axis for subplots
+    fig, axes = plt.subplots(2, 2, figsize=(16, 12))
 
+    # Sales distribution
+    sns.histplot(df['Sales'], bins=50, kde=True, ax=axes[0, 0])
+    axes[0, 0].set_title('Distribution of Sales')
+
+    # Customers distribution
+    sns.histplot(df['Customers'], bins=50, kde=True, ax=axes[0, 1])
+    axes[0, 1].set_title('Distribution of Customers')
+
+    # StoreType distribution
+    sns.countplot(x='StoreType', data=df, ax=axes[1, 0])
+    axes[1, 0].set_title('Count of Store Types')
+
+    # CompetitionDistance distribution
+    sns.histplot(df['CompetitionDistance'], bins=50, kde=True, ax=axes[1, 1])
+    axes[1, 1].set_title('Distribution of Competition Distance')
+
+    # Adjust layout
+    plt.tight_layout()
+
+    # Return the figure object
+    return fig
+
+#-----------------------------------------------------------------------------------#
+#-----------------------------------------------------------------------------------#
 import seaborn as sns
 import matplotlib.pyplot as plt
 import streamlit as st
