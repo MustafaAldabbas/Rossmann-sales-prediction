@@ -23,6 +23,8 @@ import matplotlib.pyplot as plt
 import matplotlib.pyplot as plt
 import streamlit as st
 
+import sys
+
 #-----------------------------------------------------------------------------------#
 #-----------------------------------------------------------------------------------#
 #Loding the Datasets
@@ -166,7 +168,13 @@ def clean_and_merge_datasets(train_df, test_df, store_df):
 
 #-----------------------------------------------------------------------------------#
 #-----------------------------------------------------------------------------------#
- 
+
+#-----------------------------------------------------------------------------------#
+#-----------------------------------------------------------------------------------#
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+import numpy as np
 
 def plot_and_transform_sales(df, column='Sales'):
     """
@@ -180,29 +188,33 @@ def plot_and_transform_sales(df, column='Sales'):
         pd.DataFrame: The DataFrame with the transformed sales column.
     """
     # Plot the distribution of the target variable before transformation
-    plt.figure(figsize=(10, 6))
+    plt.figure(figsize=(8, 3))
     sns.histplot(df[column], kde=True)
     plt.title(f'Distribution of {column}')
     plt.tight_layout()
-    st.pyplot(plt)  # Display the plot in Streamlit
+    plt.show()  # Display the plot in Jupyter Notebook
 
     # Apply log transformation
     df[column] = np.log1p(df[column])
 
     # Plot the distribution after log transformation
-    plt.figure(figsize=(10, 6))
+    plt.figure(figsize=(8, 4))
     sns.histplot(df[column], kde=True)
     plt.title(f'Distribution of Log-Transformed {column}')
     plt.tight_layout()
-    st.pyplot(plt)  # Display the plot in Streamlit
+    plt.show()  # Display the plot in Jupyter Notebook
 
     return df
 
+
+
 #-----------------------------------------------------------------------------------#
 #-----------------------------------------------------------------------------------#
 
+import matplotlib.pyplot as plt
+import seaborn as sns
 
-def univariate_eda(df):
+def univariate_edaN(df):
     """
     Performs univariate exploratory data analysis (EDA) on the given DataFrame.
     
@@ -215,7 +227,7 @@ def univariate_eda(df):
         None: The function outputs the plots directly.
     """
     # Set up the figure and axis for subplots
-    fig, axes = plt.subplots(2, 2, figsize=(16, 12))
+    fig, axes = plt.subplots(2, 2, figsize=(8, 12))
 
     # Sales distribution
     sns.histplot(df['Sales'], bins=50, kde=True, ax=axes[0, 0])
@@ -236,8 +248,11 @@ def univariate_eda(df):
     # Adjust layout
     plt.tight_layout()
 
-    # Display the figure in Streamlit
-    st.pyplot(fig)
+    # Display the figure in Jupyter Notebook
+    plt.show()
+
+
+
 #-----------------------------------------------------------------------------------#
 #-----------------------------------------------------------------------------------#
 def univariate_edast(df):
@@ -318,6 +333,87 @@ def bivariate_eda(df):
 #-----------------------------------------------------------------------------------#
 #-----------------------------------------------------------------------------------#
 
+def bivariate_edaN(df):
+    """
+    Performs bivariate exploratory data analysis (EDA) on the given DataFrame.
+    
+    The function plots the relationships between Sales and other variables such as Promo, StoreType, and CompetitionDistance.
+    
+    Args:
+        df (pd.DataFrame): The DataFrame containing the data to analyze.
+    
+    Returns:
+        None: The function outputs the plots directly.
+    """
+    # Sales vs Promo
+    plt.figure(figsize=(7, 3))
+    sns.boxplot(x='Promo', y='Sales', data=df)
+    plt.title('Sales vs Promo')
+    plt.tight_layout()
+    st.pyplot(plt)  # Display the plot in Streamlit
+
+    # Sales vs StoreType
+    plt.figure(figsize=(7, 3))
+    sns.boxplot(x='StoreType', y='Sales', data=df)
+    plt.title('Sales vs StoreType')
+    plt.tight_layout()
+    st.pyplot(plt)  # Display the plot in Streamlit
+
+    # Sales vs CompetitionDistance
+    plt.figure(figsize=(7, 3))
+    sns.scatterplot(x='CompetitionDistance', y='Sales', data=df)
+    plt.title('Sales vs Competition Distance')
+    plt.tight_layout()
+    
+# Display the figure in Jupyter Notebook
+    plt.show()
+#-----------------------------------------------------------------------------------#
+#-----------------------------------------------------------------------------------#
+def timeseries_edaN(df, date_col='Date', sales_col='Sales'):
+    """
+    Performs time series exploratory data analysis (EDA) on the given DataFrame.
+    
+    The function plots sales trends over time, by day of the week, and by month.
+    
+    Args:
+        df (pd.DataFrame): The DataFrame containing the data to analyze.
+        date_col (str): The name of the date column in the DataFrame. Defaults to 'Date'.
+        sales_col (str): The name of the sales column in the DataFrame. Defaults to 'Sales'.
+    
+    Returns:
+        None: The function outputs the plots directly.
+    """
+    # Ensure the date column is in datetime format
+    df[date_col] = pd.to_datetime(df[date_col])
+
+    # Sales over time
+    plt.figure(figsize=(8, 5))
+    df.groupby(date_col)[sales_col].sum().plot()
+    plt.title('Total Sales Over Time')
+    plt.ylabel(sales_col)
+    plt.tight_layout()
+    plt.show()
+
+
+    # Sales by DayOfWeek
+    plt.figure(figsize=(8, 5))
+    sns.boxplot(x='DayOfWeek', y=sales_col, data=df)
+    plt.title('Sales by Day of the Week')
+    plt.tight_layout()
+    plt.show()
+
+
+    # Sales by Month
+    df['Month'] = df[date_col].dt.month
+    plt.figure(figsize=(8, 5))
+    sns.boxplot(x='Month', y=sales_col, data=df)
+    plt.title('Sales by Month')
+    plt.tight_layout()
+    plt.show()
+
+
+#-----------------------------------------------------------------------------------#
+#-----------------------------------------------------------------------------------#
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
@@ -367,6 +463,31 @@ def timeseries_eda(df, date_col='Date', sales_col='Sales'):
 #-----------------------------------------------------------------------------------#
 #-----------------------------------------------------------------------------------#
 
+import seaborn as sns
+import matplotlib.pyplot as plt
+import streamlit as st
+
+def plot_sales_by_promoN(df):
+    """
+    This function takes a DataFrame and plots the average sales for promo vs non-promo days.
+
+    Parameters:
+    df (pd.DataFrame): DataFrame containing sales data, with 'Promo' and 'Sales' columns.
+
+    Returns:
+    None: Displays a bar chart of average sales with and without promotions.
+    """
+    # Calculate average sales for promo vs non-promo days
+    sales_by_promo = df.groupby('Promo')['Sales'].mean()
+
+    # Plotting the sales by promotion
+    plt.figure(figsize=(4, 3))
+    sns.barplot(x='Promo', y='Sales', data=df, ci=None, palette='Set2')
+    plt.xlabel('Promotion (0 = No, 1 = Yes)')
+    plt.ylabel('Average Sales')
+    plt.title('Average Sales by Promotion')
+    plt.tight_layout()
+    plt.show()
 
 #-----------------------------------------------------------------------------------#
 #-----------------------------------------------------------------------------------#
@@ -400,6 +521,48 @@ def plot_sales_by_promo(df):
 
 
 
+
+#-----------------------------------------------------------------------------------#
+#-----------------------------------------------------------------------------------#
+import pandas as pd
+import matplotlib.pyplot as plt
+import streamlit as st
+
+def plot_sales_by_competition_distanceN(df, bins=10):
+    """
+    This function takes a DataFrame and plots the average sales against competition distance.
+
+    Parameters:
+    df (pd.DataFrame): DataFrame containing sales data, with 'CompetitionDistance' and 'Sales' columns.
+    bins (int): Number of bins to divide the competition distance into. Default is 10.
+
+    Returns:
+    None: Displays a line chart of average sales by competition distance.
+    """
+    # Check if the required columns exist in the DataFrame
+    if 'CompetitionDistance' not in df.columns or 'Sales' not in df.columns:
+        st.error("The required columns ('CompetitionDistance', 'Sales') are not present in the DataFrame.")
+        return
+    
+    # Drop rows with missing values in the relevant columns
+    df = df.dropna(subset=['CompetitionDistance', 'Sales'])
+
+    # Analyze sales against competition distance
+    try:
+        sales_by_competition_distance = df.groupby(pd.cut(df['CompetitionDistance'], bins=bins))['Sales'].mean()
+    except Exception as e:
+        st.error(f"Error during analysis: {e}")
+        return
+
+    # Plotting the sales by competition distance
+    plt.figure(figsize=(6, 4))
+    sales_by_competition_distance.plot(kind='line', marker='o', color='green')
+    plt.xlabel('Competition Distance (binned)')
+    plt.ylabel('Average Sales')
+    plt.title('Average Sales by Competition Distance')
+    plt.xticks(rotation=45)
+    plt.tight_layout()
+    plt.show()
 
 
 
@@ -453,6 +616,32 @@ def plot_sales_by_competition_distance(df, bins=10):
 #-----------------------------------------------------------------------------------#
 #-----------------------------------------------------------------------------------#
 
+def plot_sales_by_school_holidayN(df):
+    """
+    This function takes a DataFrame and plots the average sales on school holidays versus non-school holidays.
+
+    Parameters:
+    df (pd.DataFrame): DataFrame containing sales data, with 'SchoolHoliday' and 'Sales' columns.
+
+    Returns:
+    None: Displays a bar chart of average sales on school holidays vs non-school holidays.
+    """
+    # Calculate average sales on school holidays vs non-school holidays
+    sales_by_school_holiday = df.groupby('SchoolHoliday')['Sales'].mean()
+
+    # Plotting the average sales on school holidays vs non-school holidays
+    plt.figure(figsize=(6, 4))
+    sales_by_school_holiday.plot(kind='bar', color='purple')
+    plt.xlabel('School Holiday (0 = No, 1 = Yes)')
+    plt.ylabel('Average Sales')
+    plt.title('Average Sales on School Holidays vs Non-School Holidays')
+    plt.xticks(rotation=0)
+    plt.tight_layout()
+    plt.show()
+
+
+#-----------------------------------------------------------------------------------#
+#-----------------------------------------------------------------------------------#
 
 
 import matplotlib.pyplot as plt
@@ -481,9 +670,44 @@ def plot_sales_by_school_holiday(df):
     plt.tight_layout()
     st.pyplot(plt)  # Display the plot in Streamlit
 
-#
+#-----------------------------------------------------------------------------------#
+#-----------------------------------------------------------------------------------#
 
+def plot_sales_by_store_type_and_assortmentN(df):
+    """
+    This function takes a DataFrame and plots the average sales by store type and assortment type.
 
+    Parameters:
+    df (pd.DataFrame): DataFrame containing sales data, with 'StoreType', 'Assortment', and 'Sales' columns.
+
+    Returns:
+    None: Displays bar charts of average sales by store type and by assortment type.
+    """
+    # Calculate average sales by store type
+    sales_by_store_type = df.groupby('StoreType')['Sales'].mean()
+
+    # Plotting the average sales by store type
+    plt.figure(figsize=(6,4))
+    sales_by_store_type.plot(kind='bar', color='teal')
+    plt.xlabel('Store Type')
+    plt.ylabel('Average Sales')
+    plt.title('Average Sales by Store Type')
+    plt.xticks(rotation=0)
+    plt.tight_layout()
+    st.pyplot(plt)  # Display the plot in Streamlit
+
+    # Calculate average sales by assortment
+    sales_by_assortment = df.groupby('Assortment')['Sales'].mean()
+
+    # Plotting the average sales by assortment
+    plt.figure(figsize=(6, 4))
+    sales_by_assortment.plot(kind='bar', color='coral')
+    plt.xlabel('Assortment Type')
+    plt.ylabel('Average Sales')
+    plt.title('Average Sales by Assortment Type')
+    plt.xticks(rotation=0)
+    plt.tight_layout()
+    plt.show()
 #-----------------------------------------------------------------------------------#
 #-----------------------------------------------------------------------------------#
 
@@ -529,8 +753,85 @@ def plot_sales_by_store_type_and_assortment(df):
 
 #-----------------------------------------------------------------------------------#
 #-----------------------------------------------------------------------------------#
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.cluster import KMeans
+from sklearn.preprocessing import StandardScaler
 
+def perform_store_clusteringN(df, n_clusters=3, max_clusters=10):
+    """
+    This function performs K-means clustering on store data based on sales, customers, promo participation, and competition distance.
 
+    Parameters:
+    df (pd.DataFrame): DataFrame containing store data, with 'Store', 'Sales', 'Customers', 'Promo', and 'CompetitionDistance' columns.
+    n_clusters (int): Number of clusters to use for K-means clustering. Default is 3.
+    max_clusters (int): Maximum number of clusters to test in the Elbow Method. Default is 10.
+
+    Returns:
+    pd.DataFrame: DataFrame with cluster labels assigned to each store.
+    None: Displays the Elbow Method plot and cluster analysis bar charts.
+    """
+    # Ensure relevant columns are numeric
+    df['Sales'] = pd.to_numeric(df['Sales'], errors='coerce')
+    df['Customers'] = pd.to_numeric(df['Customers'], errors='coerce')
+    df['Promo'] = pd.to_numeric(df['Promo'], errors='coerce')
+    df['CompetitionDistance'] = pd.to_numeric(df['CompetitionDistance'], errors='coerce')
+
+    # Select relevant features for clustering
+    store_clustering_data = df.groupby('Store').agg({
+        'Sales': 'mean',
+        'Customers': 'mean',
+        'Promo': 'mean',
+        'CompetitionDistance': 'mean'
+    }).reset_index()
+
+    # Handle any missing values by filling with 0
+    store_clustering_data.fillna(0, inplace=True)
+
+    # Standardize the features
+    scaler = StandardScaler()
+    scaled_features = scaler.fit_transform(store_clustering_data[['Sales', 'Customers', 'Promo', 'CompetitionDistance']])
+
+    # Determine the optimal number of clusters using the Elbow Method
+    wcss = []
+    for i in range(1, max_clusters + 1):
+        kmeans = KMeans(n_clusters=i, random_state=42)
+        kmeans.fit(scaled_features)
+        wcss.append(kmeans.inertia_)
+
+    # Plot the Elbow Method chart
+    plt.figure(figsize=(6, 3))
+    plt.plot(range(1, max_clusters + 1), wcss, marker='o', linestyle='--')
+    plt.xlabel('Number of Clusters')
+    plt.ylabel('WCSS')
+    plt.title('Elbow Method for Optimal Number of Clusters')
+    plt.show()  # Display the plot in Jupyter Notebook
+
+    # Applying K-means clustering with the chosen number of clusters
+    kmeans = KMeans(n_clusters=n_clusters, random_state=42)
+    clusters = kmeans.fit_predict(scaled_features)
+
+    # Add the cluster labels to the original store data
+    store_clustering_data['Cluster'] = clusters
+
+    # Analyze the characteristics of each cluster by calculating the mean of each feature within clusters
+    cluster_analysis = store_clustering_data.groupby('Cluster').mean()
+
+    # Display the cluster analysis in Jupyter Notebook
+    print("Cluster Analysis:")
+    print(cluster_analysis)
+
+    # Plotting the cluster centers for visualization
+    plt.figure(figsize=(6, 3))
+    cluster_analysis[['Sales', 'Customers', 'Promo', 'CompetitionDistance']].plot(kind='bar')
+    plt.title('Cluster Analysis: Sales, Customers, Promo, and Competition Distance by Cluster')
+    plt.xticks(rotation=0)
+    plt.show()  # Display the plot in Jupyter Notebook
+
+    return store_clustering_data
+
+#-----------------------------------------------------------------------------------#
+#-----------------------------------------------------------------------------------#
 import pandas as pd
 import matplotlib.pyplot as plt
 import streamlit as st
@@ -925,7 +1226,62 @@ def tune_and_evaluate_xgboost(X_train, y_train, X_test, y_test):
 
 
 
+#-----------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------
+def create_display_and_visualize_model_resultsN():
+    """
+    Creates a DataFrame summarizing the results of different models, displays it, and visualizes the results.
+    
+    Returns:
+    - results_df: A DataFrame summarizing the performance and hyperparameters of each model.
+    """
+    
+    # Define the results for each model using the results you shared
+    model_results = {
+        'Model': ['Random Forest', 'XGBoost', 'XGBoost (Tuned)'],
+        'RMSE': [0.44946992012881254, 0.29817999295162884, 0.2892128493088795],
+        'MAE': [0.22129262422877377, 0.07588247725820102, 0.07769083766709649],
+        'R-squared': [0.9787274724229729, 0.9906378664909703, 0.9911924929785798]
+    }
 
+    # Create a DataFrame from the results
+    results_df = pd.DataFrame(model_results)
+
+    # Display the DataFrame in Streamlit
+    st.write("### Model Performance Results")
+    st.write(results_df)
+
+    ### Plot: Comparison of RMSE, MAE, and R-squared for the models
+    fig, ax1 = plt.subplots(figsize=(8, 6))
+
+    bar_width = 0.2
+    index = range(3)
+
+    # Plot RMSE and MAE on the first y-axis
+    bars1 = ax1.bar([i - bar_width/2 for i in index], results_df['RMSE'], bar_width, label='RMSE', color='skyblue')
+    bars2 = ax1.bar([i + bar_width/2 for i in index], results_df['MAE'], bar_width, label='MAE', color='lightcoral')
+
+    ax1.set_xlabel('Model')
+    ax1.set_ylabel('RMSE / MAE')
+    ax1.set_title('Model Performance Comparison (Random Forest, XGBoost, XGBoost Tuned)')
+    ax1.set_xticks(index)
+    ax1.set_xticklabels(results_df['Model'])
+
+    # Create a second y-axis for R-squared
+    ax2 = ax1.twinx()
+    bars3 = ax2.bar([i + 1.5 * bar_width for i in index], results_df['R-squared'], bar_width, label='R-squared', color='lightgreen')
+    ax2.set_ylabel('R-squared')
+
+    # Combine legends from both axes
+    ax1.legend(loc='upper left')
+    ax2.legend(loc='upper right')
+
+    plt.show()
+
+    return results_df
+
+
+#-----------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------
 
 import pandas as pd
