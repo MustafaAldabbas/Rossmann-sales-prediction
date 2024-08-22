@@ -2,7 +2,8 @@
 # Rossmann Sales Prediction
 ## Author 
 * Mustafa Aldabbas, connect with me on [LinkedIn](https://www.linkedin.com/in/mustafa-aldabbas-85256b95/), [on X](https://x.com/Mustafa_dabbas)
-
+### **Bio**
+As a full-stack Data Analyst, I specialize in comprehensive data solutions from coding in Python and SQL to advanced predictive modeling and interactive visualizations with Streamlit and Tableau. My experience spans detailed exploratory data analysis to deploying predictive models for retail forecasts, notably enhancing forecasting capabilities for major brands like Rossmann. I blend technical expertise with strategic insights to drive significant business outcomes in competitive markets.
 
 # [Presentation](https://docs.google.com/presentation/d/1YLVU45Rn9iQhw_2XDuCX_EqTijWmMwxz/edit?usp=sharing&ouid=118224995700991179223&rtpof=true&sd=true)
 
