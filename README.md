@@ -108,3 +108,12 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 
 ## Contact
 For further inquiries, please contact Mustafa Aldabbas at [Mustafa.aldabbas@outlook.com](mailto:Mustafa.aldabbas@outlook.com).
+
+## How to Run the Streamlit App
+
+1. Clone the repository.
+2. Install the required libraries from `requirements.txt`.
+3. Run the app using the command:
+   ```bash
+   streamlit run app.py
+   ```
