@@ -7,10 +7,7 @@ from PIL import Image
 import io
 from dotenv import load_dotenv
 import os
-
 from datetime import datetime
-
-
 
 from functions import (
     load_datasets,
@@ -31,11 +28,11 @@ from functions import (
     plot_sales_by_promo,
     feature_engineering,
 )
+
 # Set up the Streamlit app
 st.set_page_config(page_title="Rossmann Sales Forecasting", layout="wide")
 
-    # Load datasets function
-    # @st.cache
+# Load datasets function
 def load_datasets():
     train_df = pd.read_csv('/Users/mustafaaldabbas/Documents/GitHub/Rossmann-sales-prediction/Datasets/Raw/train.csv')
     test_df = pd.read_csv('/Users/mustafaaldabbas/Documents/GitHub/Rossmann-sales-prediction/Datasets/Raw/test.csv')
@@ -52,7 +49,7 @@ train_df = data['train_df']
 store_df = data['store_df']
 test_df = data['test_df']
 
-    # Clean and merge datasets
+# Clean and merge datasets
 train_df_merged, test_df_merged = clean_and_merge_datasets(train_df, test_df, store_df)
 
 # **Load the pre-processed test dataframe (processed_test_df.pkl)**
@@ -79,9 +76,6 @@ with st.sidebar.expander("About the Author"):
         for retail forecasts, notably enhancing forecasting capabilities for major brands like Rossmann.
         I blend technical expertise with strategic insights to drive significant business outcomes in competitive markets.
     """)
-
-
-
 
 if pages == "Introduction 🌟":
     st.markdown("<h1 style='color:white; text-align:center;'>Rossmann Sales Forecasting 📈</h1>", unsafe_allow_html=True)
@@ -121,7 +115,6 @@ if pages == "Introduction 🌟":
 
     tab1, tab2, tab3 = st.tabs(["Train Dataset", "Test Dataset", "Store Dataset"])
 
-    
     with tab1:
         st.dataframe(train_data.head())
         st.markdown("""
@@ -154,7 +147,6 @@ if pages == "Introduction 🌟":
 elif pages == "Exploratory Data Analysis (EDA) 📊":
     st.title("Exploratory Data Analysis (EDA) 📊")
     st.image('/Users/mustafaaldabbas/Documents/GitHub/Rossmann-sales-prediction/Visuals/streamlit pics /Qoute.pptx.png', width=1000)
-
 
     tab1, tab2, tab3, tab4, tab5 = st.tabs([
         "Univariate Analysis",
@@ -203,7 +195,6 @@ elif pages == "Exploratory Data Analysis (EDA) 📊":
             - Demonstrates dominance of one type over others, impacting sales strategies.
             """)
 
-
     with tab2:
         st.subheader("Bivariate Analysis")
 
@@ -245,7 +236,6 @@ elif pages == "Exploratory Data Analysis (EDA) 📊":
         - Comparatively higher sales on school holidays.
         - Suggests an increase in shopping activity when schools are closed.
         """)
-
 
     with tab3:
         st.subheader("Time Series Analysis")
@@ -304,14 +294,9 @@ elif pages == "Exploratory Data Analysis (EDA) 📊":
             - Shows that assortment type 'b' generally yields higher sales, indicating a possibly more appealing product mix to customers.
             """)
 
-
-
-
-
 elif pages == "Feature Engineering 🔧":
     st.title("Feature Engineering 🔧")
     st.image('/Users/mustafaaldabbas/Documents/GitHub/Rossmann-sales-prediction/Visuals/streamlit pics /Feature engineering.pptx.png', width=1000)
-
 
     st.markdown("### Applying Feature Engineering")
     test_df_merged, train_df_merged, X_train, X_test, y_train, y_test = feature_engineering(train_df_merged, test_df_merged)
@@ -334,8 +319,6 @@ elif pages == "Modeling 🧠":
     st.title("Modeling 🧠")
     st.image('/Users/mustafaaldabbas/Documents/GitHub/Rossmann-sales-prediction/Visuals/streamlit pics /Modeling.pptx.png', width=1000)
 
-
-
     tab1, tab2, tab3, tab4, tab5 = st.tabs([
         "Train Random Forest", 
         "Train XGBoost", 
@@ -343,8 +326,6 @@ elif pages == "Modeling 🧠":
         "Model Performance",
         "Train Full Model"
     ])
-
-    # Your code for each tab goes here...
 
     with tab1:
         st.subheader("Train Random Forest")
@@ -357,7 +338,6 @@ MAE: 581.953692501916
 
 R2: 0.9376188668771028
 """)
-
 
     with tab2:
         st.subheader("Train XGBoost")
@@ -397,10 +377,7 @@ Tuned model saved to best_xgb_model_tuned.pkl
     with tab4:
         st.subheader("Model Performance")
         st.markdown("### Evaluate Model Performance")
-
         st.image('/Users/mustafaaldabbas/Documents/GitHub/Rossmann-sales-prediction/Visuals/EDA/Training models .png', width=1000)
-
-
 
     with tab5:
         st.subheader("Train Full Model")
@@ -408,7 +385,6 @@ Tuned model saved to best_xgb_model_tuned.pkl
 
         st.button("Train Full Model")
             
-
 # Prediction and Visualization Page
 elif pages == "Forecast 🔮":
     st.title("Forecast 🔮")
@@ -424,7 +400,6 @@ elif pages == "Forecast 🔮":
             loaded_model = joblib.load(model_path)
             st.write(f"Model loaded from {model_path}")
 
-        
             Test_df_future_sale = predict_sales_for_test_df(test_df_merged, model_path)
             
             # Display some predictions
@@ -444,45 +419,54 @@ elif pages == "Forecast 🔮":
         st.markdown("### Predicted vs The last two months of the sales history")
         st.image('/Users/mustafaaldabbas/Documents/GitHub/Rossmann-sales-prediction/Visuals/streamlit pics /2222 predictions.png', width=1000)  # Update this path
 
-
 elif pages == "Recommendations 🚀":
-    st.title("Strategic Recommendations for Rossmann")
-    st.image('/Users/mustafaaldabbas/Documents/GitHub/Rossmann-sales-prediction/Visuals/streamlit pics /Reccomendations.png', width=1000)  # Update this path
+    st.title("🚀 Strategic Recommendations for Rossmann")
+
+    # Centered image with a caption
+    image = Image.open('/Users/mustafaaldabbas/Documents/GitHub/Rossmann-sales-prediction/Visuals/streamlit pics /Reccomendations.png')
+    st.image(image, use_column_width=True, caption="Data-driven recommendations to enhance sales performance.")
 
     st.markdown("""
     ## Enhancing Sales Performance
-    Based on our comprehensive analysis of sales data across various dimensions, we propose the following strategic initiatives to boost sales performance at Rossmann stores:
-    """)
+    **Based on our comprehensive analysis of sales data across various dimensions, we propose the following strategic initiatives to boost sales performance at Rossmann stores:**
+    """, unsafe_allow_html=True)
 
-    st.header("1. Optimize Promotional Strategies")
-    st.markdown("""
-    - **Targeted Promotions:** Leverage insights from sales boosts during promotional periods to plan targeted promotions. Focus on store types and locations where promotions have historically led to significant sales uplifts.
-    - **Promotion Timing:** Optimize the timing of promotions by aligning them with high-traffic days identified from the data, particularly mid-week, to maximize impact.
-    """)
-    
-    st.header("2. Refine Assortment Planning")
-    st.markdown("""
-    - **Assortment Customization:** Tailor store assortments based on the sales performance of different categories. Prioritize high-performing assortments, particularly in store types where these assortments have shown to significantly drive sales.
-    - **Local Preferences:** Analyze customer buying patterns to adapt the product offerings to local preferences and seasonal trends.
-    """)
+    # Create columns for recommendations
+    col1, col2 = st.columns(2)
 
-    st.header("3. Competitive Positioning")
-    st.markdown("""
-    - **Proximity to Competitors:** Implement strategic pricing and marketing campaigns in stores closer to competitors, as shown by the variable impact of competition distance on sales.
-    - **Competitive Differentiation:** Enhance store features and customer service in highly competitive zones to differentiate Rossmann stores from nearby competitors.
-    """)
+    # Column 1: Recommendation 1 & 2
+    with col1:
+        st.header("1. Optimize Promotional Strategies")
+        st.markdown("""
+        - **🎯 Targeted Promotions:** Leverage insights from sales boosts during promotional periods to plan targeted promotions. Focus on store types and locations where promotions have historically led to significant sales uplifts.
+        - **⏰ Promotion Timing:** Optimize the timing of promotions by aligning them with high-traffic days identified from the data, particularly mid-week, to maximize impact.
+        """)
 
-    st.header("4. Enhance Customer Experience")
-    st.markdown("""
-    - **Store Layout Optimization:** Improve the layout and in-store navigation to enhance shopping experience, potentially increasing sales per customer visit.
-    - **Customer Loyalty Programs:** Develop or enhance loyalty programs to increase repeat customer rates, drawing from insights on how customer counts correlate strongly with sales.
-    """)
+        st.header("2. Refine Assortment Planning")
+        st.markdown("""
+        - **🛒 Assortment Customization:** Tailor store assortments based on the sales performance of different categories. Prioritize high-performing assortments, particularly in store types where these assortments have shown to significantly drive sales.
+        - **📊 Local Preferences:** Analyze customer buying patterns to adapt the product offerings to local preferences and seasonal trends.
+        """)
 
-    st.header("5. Leverage Seasonal Trends")
-    st.markdown("""
-    - **Seasonal Marketing:** Capitalize on seasonal peaks by increasing inventory and marketing efforts during high-sales months and around holidays.
-    - **Event-Based Promotions:** Use insights from sales performance during school holidays to plan events and promotions that attract more visitors during off-peak times.
-    """)
+    # Column 2: Recommendation 3, 4 & 5
+    with col2:
+        st.header("3. Competitive Positioning")
+        st.markdown("""
+        - **🏪 Proximity to Competitors:** Implement strategic pricing and marketing campaigns in stores closer to competitors, as shown by the variable impact of competition distance on sales.
+        - **💡 Competitive Differentiation:** Enhance store features and customer service in highly competitive zones to differentiate Rossmann stores from nearby competitors.
+        """)
+
+        st.header("4. Enhance Customer Experience")
+        st.markdown("""
+        - **🛍️ Store Layout Optimization:** Improve the layout and in-store navigation to enhance shopping experience, potentially increasing sales per customer visit.
+        - **💳 Customer Loyalty Programs:** Develop or enhance loyalty programs to increase repeat customer rates, drawing from insights on how customer counts correlate strongly with sales.
+        """)
+
+        st.header("5. Leverage Seasonal Trends")
+        st.markdown("""
+        - **📅 Seasonal Marketing:** Capitalize on seasonal peaks by increasing inventory and marketing efforts during high-sales months and around holidays.
+        - **🎉 Event-Based Promotions:** Use insights from sales performance during school holidays to plan events and promotions that attract more visitors during off-peak times.
+        """)
 
     st.markdown("""
     ## Implementation
@@ -494,20 +478,25 @@ elif pages == "Recommendations 🚀":
     By aligning our sales strategies with the detailed insights gained from our data analysis, Rossmann can effectively enhance overall sales performance, achieving a better market position and improved profitability.
     """)
 
+    with st.sidebar:
+        st.header("Additional Resources")
+        st.markdown("""
+        - [Rossmann Official Website](https://www.rossmann.de)
+        - [Data Source](https://github.com/Mustafaaldabbas/Rossmann-sales-prediction)
+        - [Streamlit Documentation](https://docs.streamlit.io/)
+        """)
+        st.image(image, caption="Rossmann Sales Data Insights", use_column_width=True)
+
 elif pages == "Conclusion 🏁":
-    # Header image for a polished look
     st.image('/Users/mustafaaldabbas/Documents/GitHub/Rossmann-sales-prediction/Visuals/streamlit pics /conclusion.png', width=1000)
 
-    # Main Title with Emphasis
     st.title("Project Summary & Strategic Insights 🚀")
 
-    # Introduction to the conclusion
     st.markdown("""
     ### Project Recap
     This project embarked on a journey to enhance Rossmann's sales strategies through data-driven insights. Here’s what we accomplished:
     """)
 
-    # Using columns to separate sections visually
     col1, col2, col3 = st.columns(3)
     with col1:
         st.subheader("1. Key Sales Factors")
@@ -531,7 +520,6 @@ elif pages == "Conclusion 🏁":
         - **Competitive Strategy:** Refined approaches based on competitor analysis.
         """)
 
-    # Highlight Key Takeaways and Next Steps
     st.markdown("""
     ### Key Takeaways
     The analysis not only yielded precise sales forecasts but also unveiled critical sales drivers, providing Rossmann with the tools to refine its market approach.
@@ -540,6 +528,5 @@ elif pages == "Conclusion 🏁":
     Moving forward, the insights from this project will guide inventory management, staff planning, and promotional campaigns, ensuring that Rossmann remains competitive and proactive in its market strategies.
     """)
 
-    # Visual Call to Action
     st.markdown("#### Explore Further")
     st.markdown("Navigate through the app to revisit data insights, review model performances, or adjust prediction parameters.")
