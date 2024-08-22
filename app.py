@@ -55,6 +55,9 @@ test_df = data['test_df']
     # Clean and merge datasets
 train_df_merged, test_df_merged = clean_and_merge_datasets(train_df, test_df, store_df)
 
+# **Load the pre-processed test dataframe (processed_test_df.pkl)**
+test_df_merged = pd.read_pickle("processed_test_df.pkl")
+
 # Sidebar Navigation
 st.sidebar.title("Rossmann Sales Forecasting App")
 pages = st.sidebar.radio(
@@ -439,7 +442,7 @@ elif pages == "Forecast 🔮":
     with tab2:
         st.subheader("Visualize Predictions")
         st.markdown("### Predicted vs The last two months of the sales history")
-        st.image('/Users/mustafaaldabbas/Documents/GitHub/Rossmann-sales-prediction/Visuals/streamlit pics /Prediction.png', width=1000)  # Update this path
+        st.image('/Users/mustafaaldabbas/Documents/GitHub/Rossmann-sales-prediction/Visuals/streamlit pics /2222 predictions.png', width=1000)  # Update this path
 
 
 elif pages == "Recommendations 🚀":
