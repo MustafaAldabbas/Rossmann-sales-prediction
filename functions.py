@@ -268,7 +268,7 @@ def univariate_edast(df):
         matplotlib.figure.Figure: The figure object containing all the subplots.
     """
     # Set up the figure and axis for subplots
-    fig, axes = plt.subplots(2, 2, figsize=(16, 12))
+    fig, axes = plt.subplots(2, 2, figsize=(8, 6))
 
     # Sales distribution
     sns.histplot(df['Sales'], bins=50, kde=True, ax=axes[0, 0])

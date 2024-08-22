@@ -1,7 +1,7 @@
 [theme]
-base = "light"
-primaryColor = "#228B22"
-backgroundColor = "#f0fff0"
-secondaryBackgroundColor = "#cce0cc"
-textColor = "#000000"
+base = "dark"
+primaryColor = "#9b59b6"
+backgroundColor = "#1e1e1e"
+secondaryBackgroundColor = "#663399"  # This should set the sidebar to purple
+textColor = "#ffffff"
 font = "sans-serif"
