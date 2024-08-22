@@ -7,6 +7,10 @@ As a full-stack Data Analyst, I specialize in comprehensive data solutions from 
 
 # [Presentation](https://docs.google.com/presentation/d/1YLVU45Rn9iQhw_2XDuCX_EqTijWmMwxz/edit?usp=sharing&ouid=118224995700991179223&rtpof=true&sd=true)
 
+## Streamlit App Demo
+Here is a recorded demo of the Streamlit app:
+[Watch the demo video]([your-google-drive-link](https://drive.google.com/file/d/1lErNDzd0F0_yixbEye-LMcozI6eHNqbS/view?usp=sharing))
+
 ## Project Overview
 This project aims to predict daily sales for Rossmann stores using historical sales data, store characteristics, promotions, and other relevant factors. The goal is to identify key factors influencing sales, build an accurate predictive model, and provide actionable insights to optimize sales strategies in a competitive retail environment.
 
