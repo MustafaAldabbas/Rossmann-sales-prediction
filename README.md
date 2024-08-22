@@ -16,6 +16,8 @@ This project aims to predict daily sales for Rossmann stores using historical sa
 - **Provide Strategic Insights:** Identify actionable recommendations for enhancing sales performance based on data-driven insights.
 
 ## Datasets
+![Sales Distribution](https://github.com/MustafaAldabbas/Rossmann-sales-prediction/blob/main/Visuals/streamlit%20pics%20/Project%20Objectibes%20.pptx.png)
+
 - **train.csv:** Historical sales data including daily sales figures for Rossmann stores.
 - **store.csv:** Store-specific features such as store type, assortment type, and competition details.
 - **test.csv:** Data used for predicting sales without the actual sales figures.
@@ -29,55 +31,56 @@ This project aims to predict daily sales for Rossmann stores using historical sa
     - **Preprocessing:** Handled missing values, converted data types, and removed outliers.
  
 
-2. **Exploratory Data Analysis (EDA)**
-    - **Univariate Analysis:**
-    - 
+2. ## **Exploratory Data Analysis (EDA)**
+    - ## **Univariate Analysis:**
+      
     ![Sales Distribution](https://github.com/MustafaAldabbas/Rossmann-sales-prediction/blob/main/Visuals/UNI%20variante%20/Sales%20distribution%20.png)
 
-    - **Bivariate Analysis:**
-    - 
+    - ## **Bivariate Analysis:**
+      
     ![Sales and promotion](https://github.com/MustafaAldabbas/Rossmann-sales-prediction/blob/main/Visuals/EDA/Sales%20and%20Promotion.png)
 
-    - **Sales over time:**
-    - 
+    - ## **Sales over time:**
+      
     ![sales Over Time](https://github.com/MustafaAldabbas/Rossmann-sales-prediction/blob/main/Visuals/EDA/sales%20by%20month%20.png)
 
-    - **Sales, Customer, Competition:**
-    - 
+    - ## **Sales, Customer, Competition:**
+      
     ![sales Over Time](https://github.com/MustafaAldabbas/Rossmann-sales-prediction/blob/main/Visuals/EDA/sales%20cluster.png)
-    - 
+    
+    
 
 
-3. **Feature Engineering**
-![Gross Income Over Time](https://github.com/MustafaAldabbas/Machine_learning_superstore/blob/main/my%20pic/gross_income__over_time.png)
-
+3. ## **Feature Engineering**
+   
+   ![Gross Income Over Time](https://github.com/MustafaAldabbas/Rossmann-sales-prediction/blob/main/Visuals/streamlit%20pics%20/Feature%20engineering.pptx.png)
     - **Binary Features:** Created binary indicators for promotions and competition effects.
     - **Lag Features:** Added lagged sales data to capture time-dependent patterns.
     - **Moving Averages:** Calculated moving averages for sales to smooth out fluctuations.
     - **Encoding:** Applied label encoding and one-hot encoding to categorical variables.
 
-4. **Model Building**
-![Gross Income Over Time](https://github.com/MustafaAldabbas/Machine_learning_superstore/blob/main/my%20pic/gross_income__over_time.png)
-
+5. ## **Model Building**
+   ![Gross Income Over Time](https://github.com/MustafaAldabbas/Rossmann-sales-prediction/blob/main/Visuals/streamlit%20pics%20/Modeling.pptx.png)
+    
     - **Random Forest Regressor:** Trained an initial model to establish a baseline.
     - **LightGBM Regressor:** Developed a LightGBM model for comparison.
     - **XGBoost:** Built and tuned an XGBoost model, which showed superior performance.
 
-5. **Model Evaluation and Selection**
-![Gross Income Over Time](https://github.com/MustafaAldabbas/Machine_learning_superstore/blob/main/my%20pic/gross_income__over_time.png)
-
+6. ## **Model Evaluation and Selection**
+   ![Gross Income Over Time](https://github.com/MustafaAldabbas/Rossmann-sales-prediction/blob/main/Visuals/streamlit%20pics%20/model%20evaluation.png)
+    
     - **Metrics:** Evaluated models using RMSE, MAE, and R².
     - **Hyperparameter Tuning:** Optimized model performance through grid search and cross-validation.
     - **Model Comparison:** Compared different models and selected the best one for deployment.
 
-6. **Predictions and Deployment**
-![Gross Income Over Time](https://github.com/MustafaAldabbas/Machine_learning_superstore/blob/main/my%20pic/gross_income__over_time.png)
-
+7. ## **Predictions and Deployment**
+   
+   ![Gross Income Over Time](https://github.com/MustafaAldabbas/Rossmann-sales-prediction/blob/main/Visuals/streamlit%20pics%20/2222%20predictions.png)
     - **Final Model Training:** Retrained the best model on the full training set.
     - **Prediction:** Generated sales predictions on the test dataset.
     - **Deployment:** Saved the model for future use and prepared a submission file.
 
-## Results
+# Results
 - **Best Model:** XGBoost, which provided the lowest RMSE and highest R², was selected as the final model.
 - **Insights:** The analysis revealed the significant impact of promotions, store types, and competition on sales.
 - **Recommendations:** Suggested strategic initiatives for Rossmann to enhance sales based on the model's predictions.
