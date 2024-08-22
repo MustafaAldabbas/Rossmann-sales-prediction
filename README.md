@@ -27,17 +27,25 @@ This project aims to predict daily sales for Rossmann stores using historical sa
     - **Loading:** Imported datasets into Pandas DataFrames.
     - **Merging:** Combined `train.csv` and `store.csv` on the `Store` column.
     - **Preprocessing:** Handled missing values, converted data types, and removed outliers.
-    - **Time Series Analysis:** Conducted analysis to identify trends, seasonality, and cyclical patterns in sales data.
+ 
 
 2. **Exploratory Data Analysis (EDA)**
-    - **Univariate Analysis:** Examined the distribution of key variables like sales and customer counts.
-    ![Gross Income Over Time](https://github.com/MustafaAldabbas/Machine_learning_superstore/blob/main/my%20pic/gross_income__over_time.png)
+    - **Univariate Analysis:**
+    - 
+    ![Sales Distribution](https://github.com/MustafaAldabbas/Rossmann-sales-prediction/blob/main/Visuals/UNI%20variante%20/Sales%20distribution%20.png)
 
-    - **Bivariate Analysis:** Explored relationships between variables, such as promotions and sales, using visualizations.
-    ![Gross Income Over Time](https://github.com/MustafaAldabbas/Machine_learning_superstore/blob/main/my%20pic/gross_income__over_time.png)
+    - **Bivariate Analysis:**
+    - 
+    ![Sales and promotion](https://github.com/MustafaAldabbas/Rossmann-sales-prediction/blob/main/Visuals/EDA/Sales%20and%20Promotion.png)
 
-    - **Correlation Analysis:** Identified relationships between numerical features and the target variable (Sales).
-    ![Gross Income Over Time](https://github.com/MustafaAldabbas/Machine_learning_superstore/blob/main/my%20pic/gross_income__over_time.png)
+    - **Sales over time:**
+    - 
+    ![sales Over Time](https://github.com/MustafaAldabbas/Rossmann-sales-prediction/blob/main/Visuals/EDA/sales%20by%20month%20.png)
+
+    - **Sales, Customer, Competition:**
+    - 
+    ![sales Over Time](https://github.com/MustafaAldabbas/Rossmann-sales-prediction/blob/main/Visuals/EDA/sales%20cluster.png)
+    - 
 
 
 3. **Feature Engineering**
