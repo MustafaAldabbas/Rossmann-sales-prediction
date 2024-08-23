@@ -57,7 +57,7 @@ This project aims to predict daily sales for Rossmann stores using historical sa
 
 3. ## **Feature Engineering**
    
-   ![Gross Income Over Time](https://github.com/MustafaAldabbas/Rossmann-sales-prediction/blob/main/Visuals/streamlit%20pics%20/Feature%20engineering.pptx.png)
+    ![Feature engineering](https://github.com/MustafaAldabbas/Rossmann-sales-prediction/blob/main/Visuals/streamlit%20pics%20/Feature%20engineering.pptx.jpg)
     - **Binary Features:** Created binary indicators for promotions and competition effects.
     - **Lag Features:** Added lagged sales data to capture time-dependent patterns.
     - **Moving Averages:** Calculated moving averages for sales to smooth out fluctuations.
