@@ -59,7 +59,7 @@ test_df_merged = pd.read_pickle("processed_test_df.pkl")
 st.sidebar.title("Rossmann Sales Forecasting App")
 pages = st.sidebar.radio(
     "Navigate to",
-    ["Introduction 🌟", "Exploratory Data Analysis (EDA) 📊", "Feature Engineering 🔧", "Modeling 🧠", "Forecast 🔮", "Recommendations 🚀", "Conclusion 🏁"]
+    ["Introduction 🌟", "Exploratory Data Analysis (EDA) 📊", "Feature Engineering 🔧", "Modeling 🧠", "Forecast 🔮", "Upload & Predict 📤", "Recommendations 🚀", "Conclusion 🏁"]
 )
 
 # Authors section in sidebar
@@ -427,6 +427,54 @@ elif pages == "Forecast 🔮":
         st.subheader("Visualize Predictions")
         st.markdown("### Predicted vs The last two months of the sales history")
         st.image('/Users/mustafaaldabbas/Documents/GitHub/Rossmann-sales-prediction/Visuals/streamlit pics /2222 predictions.png', width=1000)  # Update this path
+
+elif pages == "Upload & Predict 📤":
+    st.title("Upload Your Dataset and Get Predictions 📤")
+
+    st.markdown("""
+    Upload your dataset to make predictions using the pre-trained model.
+    Make sure your dataset follows the required format with all necessary columns.
+    """)
+
+    # Upload file
+    uploaded_file = st.file_uploader("Choose a file", type=["csv", "xlsx"])
+
+    if uploaded_file is not None:
+        # Check if the uploaded file is CSV or Excel
+        if uploaded_file.name.endswith('.csv'):
+            user_data = pd.read_csv(uploaded_file)
+        elif uploaded_file.name.endswith('.xlsx'):
+            user_data = pd.read_excel(uploaded_file)
+        
+        st.write("Uploaded Dataset Preview:")
+        st.write(user_data.head())
+
+        # Process the uploaded data
+        try:
+            # Assuming `clean_and_merge_datasets` and `feature_engineering` functions
+            # can be used to preprocess the uploaded data in the same way as the original data
+            processed_user_data = clean_and_merge_datasets(user_data, store_df)
+
+            # Further feature engineering, if applicable
+            _, processed_user_data, _, _, _, _ = feature_engineering(train_df_merged, processed_user_data)
+
+            # Load the pre-trained model
+            model_path = 'best_xgb_model_full_trained.pkl'
+            loaded_model = joblib.load(model_path)
+            st.write(f"Model loaded from {model_path}")
+
+            # Make predictions on the processed data
+            user_data_predictions = predict_sales_for_test_df(processed_user_data, model_path)
+            
+            st.write("Predictions:")
+            st.write(user_data_predictions[['Date', 'Store', 'Predicted_Sales']])
+            
+            # Option to download predictions
+            csv = user_data_predictions.to_csv(index=False)
+            st.download_button("Download Predictions", data=csv, file_name="predictions.csv", mime="text/csv")
+
+        except Exception as e:
+            st.error(f"An error occurred: {e}")
 
 elif pages == "Recommendations 🚀":
     st.title("🚀 Strategic Recommendations for Rossmann")
