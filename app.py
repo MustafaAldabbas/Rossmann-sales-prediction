@@ -86,62 +86,71 @@ if pages == "Introduction 🌟":
     test_data = pd.read_csv('/Users/mustafaaldabbas/Documents/GitHub/Rossmann-sales-prediction/Datasets/Raw/test.csv')
     store_data = pd.read_csv('/Users/mustafaaldabbas/Documents/GitHub/Rossmann-sales-prediction/Datasets/Raw/store.csv')
 
-    col1, col2 = st.columns([2, 1])  # Adjust column widths for better visual balance
+    st.markdown("## Welcome to the Rossmann Sales Forecasting Project")
+    st.markdown("""
+    The project aims to address a critical business challenge: predicting daily sales 
+    for Rossmann stores. By leveraging historical sales data and various store-related 
+    features, we seek to build a robust predictive model to improve operational efficiency 
+    and optimize sales.
+    """)
 
-    with col1:
-        st.markdown("## Welcome to the Rossmann Sales Forecasting Project")
-        st.markdown("""
-        The project aims to address a critical business challenge: predicting daily sales for Rossmann stores. By leveraging historical sales data and various store-related features, we seek to build a robust predictive model to improve operational efficiency and optimize sales.
-        """)
+    st.markdown("### Project Definition and Objectives")
+    st.markdown("""
+    **Primary Objective:** Predict daily sales using historical data and store-specific features.
+    **Secondary Objectives:** Understand sales influences, develop accurate forecasting models, 
+    and identify actionable insights to enhance performance.
+    """)
+    st.image('/Users/mustafaaldabbas/Documents/GitHub/Rossmann-sales-prediction/Visuals/streamlit pics /Project goals .pptx.png', width=1000)
 
-        st.markdown("### Project Definition and Objectives")
-        st.markdown("""
-        **Primary Objective:** Predict daily sales using historical data and store-specific features.
-        **Secondary Objectives:** Understand sales influences, develop accurate forecasting models, and identify actionable insights to enhance performance.
-        """)
-        st.image('/Users/mustafaaldabbas/Documents/GitHub/Rossmann-sales-prediction/Visuals/streamlit pics /Project goals .pptx.png', width=1000)
+    st.markdown("### Data Previews and Summary")
 
-    with col2:
-        st.markdown("### Datasets Summary")
-        st.markdown("**Store Dataset (`store.csv`)**")
-        st.markdown("""
-        - **Total Records:** 1,115
-        - **Key Info:** Store type, assortment, competition distance, promotional details.
-        - **Missing Values:** Some fields like competition distance and promotional timing details.
-        """)
-
-    st.markdown("### Data Previews")
-    st.image('/Users/mustafaaldabbas/Documents/GitHub/Rossmann-sales-prediction/Visuals/streamlit pics /Project Objectibes .pptx.png', width=1000)
-
+    # Creating tabs for each dataset preview
     tab1, tab2, tab3 = st.tabs(["Train Dataset", "Test Dataset", "Store Dataset"])
 
     with tab1:
-        st.dataframe(train_data.head())
-        st.markdown("""
-        - **Total Records:** 1,017,209
-        - **Features:** Store ID, day of week, date, sales, customers, open status, promotions.
-        - **Missing Values:** None significant.
-        """)
-    
+        col1, col2 = st.columns([2, 1])
+        with col1:
+            st.dataframe(train_data.head())
+        with col2:
+            st.markdown("""
+            ### Datasets Summary
+            **Store Dataset (`train.csv`)**
+            - **Total Records:** 1,017,209
+            - **Features:** Store ID, day of week, date, sales, customers, open status, promotions.
+            - **Missing Values:** None significant.
+            """)
+
     with tab2:
-        st.dataframe(test_data.head())
-        st.markdown("""
-        - **Total Records:** 41,088
-        - **Features:** Similar to `train.csv` but without the sales column.
-        - **Missing Values:** None significant.
-        """)
+        col1, col2 = st.columns([2, 1])
+        with col1:
+            st.dataframe(test_data.head())
+        with col2:
+            st.markdown("""
+            ### Datasets Summary
+            **Test Dataset (`test.csv`)**
+            - **Total Records:** 41,088
+            - **Features:** Similar to `train.csv` but without the sales column.
+            - **Missing Values:** None significant.
+            """)
 
     with tab3:
-        st.dataframe(store_data.head())
-        st.markdown("""
-        - **Total Records:** 1,115
-        - **Features:** Store type, assortment, competition distance, promo2 details.
-        - **Missing Values:** Various, particularly in competition and promo2 details.
-        """)
+        col1, col2 = st.columns([2, 1])
+        with col1:
+            st.dataframe(store_data.head())
+        with col2:
+            st.markdown("""
+            ### Datasets Summary
+            **Store Dataset (`store.csv`)**
+            - **Total Records:** 1,115
+            - **Key Info:** Store type, assortment, competition distance, promotional details.
+            - **Missing Values:** Some fields like competition distance and promotional timing details.
+            """)
 
     st.markdown("""
-    **Navigate through the app to explore the data, understand the models, and see the predictions in action!**
+    **Navigate through the app to explore the data, understand the models, 
+    and see the predictions in action!**
     """)
+
 
 # EDA Page
 elif pages == "Exploratory Data Analysis (EDA) 📊":
@@ -296,7 +305,7 @@ elif pages == "Exploratory Data Analysis (EDA) 📊":
 
 elif pages == "Feature Engineering 🔧":
     st.title("Feature Engineering 🔧")
-    st.image('/Users/mustafaaldabbas/Documents/GitHub/Rossmann-sales-prediction/Visuals/streamlit pics /Feature engineering.pptx.png', width=1000)
+    st.image('/Users/mustafaaldabbas/Documents/GitHub/Rossmann-sales-prediction/Visuals/streamlit pics /Feature engineering 2.pptx.png', width=1000)
 
     st.markdown("### Applying Feature Engineering")
     test_df_merged, train_df_merged, X_train, X_test, y_train, y_test = feature_engineering(train_df_merged, test_df_merged)
